@@ -48,6 +48,7 @@ flowchart TD
 
     subgraph S3["3 . Normalization and feedforward"]
         rmsnorm["RMSNorm + SwiGLU<br/>2019-20"]
+        mhc["mHC<br/>2025"]
     end
 
     subgraph S4["4 . Attention mechanism"]
@@ -83,7 +84,7 @@ flowchart TD
 
     class transformer,gpt foundations
     class rope,alibi,yarn positional
-    class rmsnorm normffn
+    class rmsnorm,mhc normffn
     class mqagqa,flash,swa,linattn,mla,star,ring,longformer attention
     class moe moe
     class llama,mixtral,deepseekv2,qwen,gemma composed
@@ -144,8 +145,12 @@ flowchart LR
         gemma2["Gemma<br/>Google DeepMind"]
         deepseekmoe2["DeepSeekMoE<br/>DeepSeek AI"]
     end
+    subgraph Y2025["2025"]
+        direction TB
+        mhc2["mHC<br/>DeepSeek AI"]
+    end
 
-    Y2017 --> Y2019 --> Y2020 --> Y2021 --> Y2022 --> Y2023 --> Y2024
+    Y2017 --> Y2019 --> Y2020 --> Y2021 --> Y2022 --> Y2023 --> Y2024 --> Y2025
 ```
 
 ## 1. Foundations
@@ -168,6 +173,7 @@ flowchart LR
 | Topic | Lab | Year | Paper | Status |
 |---|---|---|---|---|
 | [`rmsnorm-and-swiglu`](rmsnorm-and-swiglu/) | - / Google | 2019 / 2020 | [RMSNorm](https://arxiv.org/abs/1910.07467), [GLU Variants](https://arxiv.org/abs/2002.05202) | ✅ |
+| [`manifold-constrained-hyper-connections`](manifold-constrained-hyper-connections/) (mHC) | DeepSeek AI | 2025 | [mHC](https://arxiv.org/abs/2512.24880) | ✅ |
 
 ## 4. Attention Mechanisms & Efficiency Variants
 
