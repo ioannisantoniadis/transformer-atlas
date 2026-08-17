@@ -19,6 +19,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
           prompt: |
             REPO: ${{ github.repository }}
 
@@ -47,6 +48,13 @@ jobs:
             If nothing meets that bar, do nothing and exit; do not open a
             placeholder or empty issue.
 
+            Verification: a WebSearch snippet is a lead, not a citation.
+            For every candidate, use WebFetch to open the actual paper
+            page (arXiv abstract, HF paper page, or lab blog post) and
+            confirm the title, authors/lab, and date before writing
+            anything about it. Do not include a candidate whose paper
+            page you couldn't independently load and confirm.
+
             Before opening anything, run `gh issue list --label candidate-technique --state all`
             to see what's already been flagged, so you don't propose the
             same technique twice across runs.
@@ -66,4 +74,4 @@ jobs:
             anything, and do not open pull requests -- this run is
             read-only against the repo itself, its only output is issues.
           claude_args: |
-            --allowedTools "Read,Glob,WebSearch,Bash(gh issue list:*),Bash(gh issue create:*),Bash(gh label create:*),Bash(gh label list:*)"
+            --allowedTools "Read,Glob,Grep,TodoWrite,WebSearch,WebFetch,Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue create:*),Bash(gh label create:*),Bash(gh label list:*)"
