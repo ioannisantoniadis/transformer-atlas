@@ -27,7 +27,9 @@ jobs:
             the scope statement and MAP.md for the full list of what's
             already covered (both tables and the two diagrams at the top).
 
-            Task: find genuinely new or newly-mainstream transformer
+            ## Part 1 -- find new candidates
+
+            Find genuinely new or newly-mainstream transformer
             architecture techniques from major AI labs (Google/DeepMind,
             OpenAI, Meta, Mistral AI, DeepSeek, NVIDIA, Anthropic, Alibaba,
             and similar) that are NOT already in MAP.md, published or
@@ -44,8 +46,8 @@ jobs:
             Bar for flagging something: it must be a genuinely new
             architectural technique, or an existing one that has clearly
             become mainstream/widely cited -- not routine research noise.
-            If nothing meets that bar, do nothing and exit; do not open a
-            placeholder or empty issue.
+            If nothing meets that bar, skip straight to Part 2; do not
+            open a placeholder or empty issue.
 
             Verification: a WebSearch snippet is a lead, not a citation.
             For every candidate, use WebFetch to open the actual paper
@@ -54,12 +56,12 @@ jobs:
             anything about it. Do not include a candidate whose paper
             page you couldn't independently load and confirm.
 
-            Before opening anything, run `gh issue list --label candidate-technique --state all`
-            to see what's already been flagged, so you don't propose the
-            same technique twice across runs.
+            Run `gh issue list --label candidate-technique --state all`
+            first, so you don't propose the same technique twice across
+            runs.
 
-            For each qualifying candidate (cap at 5 per run), open one
-            GitHub issue via `gh issue create` with:
+            For each qualifying candidate (cap at 5 new issues per run),
+            open one GitHub issue via `gh issue create` with:
               - Title: "New technique: <name> (<lab>, <year>)"
               - Body: what it is, why it's a candidate, links to the
                 paper(s), and which MAP.md section it would likely belong
@@ -69,11 +71,81 @@ jobs:
                 `gh label create candidate-technique --color 0e8a16 --description "Possible new addition to MAP.md" || true`
                 if it doesn't already exist).
 
+            ## Part 2 -- assess every open candidate
+
+            Run this for EVERY issue currently labeled
+            `candidate-technique` and open -- the ones you just opened in
+            Part 1, plus any that already existed. This is the objective,
+            evidence-based grade the maintainer reads instead of trusting
+            either of our judgment calls.
+
+            For each such issue:
+
+            1. Paper age: determine the paper's first public date (arXiv
+               submission date, or the lab's own announcement date if
+               there's no preprint) via WebFetch on its paper page. This
+               -- NOT when the GitHub issue was opened -- is the clock
+               that matters. Compute its age in days from today.
+
+            2. Citation count -- a real, independently-checkable number,
+               not an estimate: run
+               `curl -s "https://api.semanticscholar.org/graph/v1/paper/arXiv:<id>?fields=citationCount,influentialCitationCount"`
+               with the paper's actual arXiv ID. Only use `curl` against
+               this API. If the paper isn't indexed yet (common for very
+               recent papers), report that explicitly rather than
+               guessing a number.
+
+            3. Adoption count: via WebSearch, count distinct labs, teams,
+               or models -- other than whoever introduced the technique
+               -- confirmed (with a linkable source) to use or replicate
+               it.
+
+            4. Independent discussion count: via WebSearch, count
+               substantive third-party technical discussions (engineering
+               blogs, other papers citing it, in-depth write-ups) -- not
+               social-media mentions, and not anything published by the
+               originating lab.
+
+            5. Production status: is it shipping today in a
+               generally-available model? Yes/no, with the model name
+               and a source if yes.
+
+            Compute a grade from these numbers:
+              - BREAKTHROUGH: (production=yes AND citationCount >= 10)
+                OR adoption_count >= 2 OR citationCount >= 30.
+              - NOTABLE: production=yes OR citationCount >= 10 OR
+                adoption_count >= 1.
+              - EMERGING: citationCount >= 3 OR discussion_count >= 2.
+              - WATCHING: none of the above (the default for a
+                freshly-opened issue with no independent pickup yet).
+
+            Post a comment on the issue -- every run, even if the grade
+            is unchanged from last time, so the assessment's evolution
+            over time stays visible in the thread -- starting with the
+            exact line `### SOTA assessment`, followed by: the paper's
+            first-public date and age in days, citation count (with a
+            link to its Semantic Scholar page, or "not yet indexed"),
+            the specific adoption instances found (with links), the
+            specific discussions found (with links), production status,
+            and the resulting grade with a one-line justification.
+
+            Then sync the issue's grade label to match: remove any
+            existing `grade:*` label from the issue (`gh issue edit
+            --remove-label`) and add the correct one -- `grade:watching`,
+            `grade:emerging`, `grade:notable`, or `grade:breakthrough`
+            (`gh issue edit --add-label`, creating the label first via
+            `gh label create` the first time each is needed).
+
+            Backlog hygiene: if the paper is more than ~180 days old and
+            the issue is still graded WATCHING or EMERGING, close it via
+            `gh issue close` with a comment explaining it didn't
+            accumulate enough independent evidence over that time.
+
             Do not modify any files in the repository, do not commit
-            anything, and do not open pull requests -- this run is
-            read-only against the repo itself, its only output is issues.
+            anything, and do not open pull requests -- this run only
+            ever writes issues, comments, and labels.
           claude_args: |
-            --allowedTools "Read,Glob,Grep,TodoWrite,WebSearch,WebFetch,Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue create:*),Bash(gh label create:*),Bash(gh label list:*)"
+            --allowedTools "Read,Glob,Grep,TodoWrite,WebSearch,WebFetch,Bash(curl:*),Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue create:*),Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh label create:*),Bash(gh label list:*)"
 
   promote:
     needs: scan
@@ -107,51 +179,30 @@ jobs:
             and the two Mermaid diagrams at the top) before doing
             anything else.
 
-            Task: decide which open `candidate-technique` issues are
-            ready to actually be added to the repo, and add them via PR.
+            Task: promote issues the scan job that just ran has already
+            graded NOTABLE or BREAKTHROUGH, by opening a PR for each.
             Nothing gets written straight to main -- every addition is a
-            PR the maintainer reviews and merges.
+            PR the maintainer reviews and merges. Do not re-derive the
+            grade yourself -- read it from the issue's most recent
+            `### SOTA assessment` comment (`gh issue view <n> --json
+            comments`) and its `grade:*` label; that assessment is the
+            source of truth.
 
-            Run `gh issue list --label candidate-technique --state open --json number,title,createdAt,body`
-            to get the current candidates.
+            Run:
+              gh issue list --label candidate-technique --label grade:notable --state open --json number,title,createdAt
+              gh issue list --label candidate-technique --label grade:breakthrough --state open --json number,title,createdAt
 
-            For each one, apply this rubric exactly:
+            Eligibility:
+              - BREAKTHROUGH issues are eligible immediately -- the grade
+                itself represents overwhelming evidence.
+              - NOTABLE issues are additionally eligible only once the
+                paper's first-public date (read from the SOTA-assessment
+                comment, not recomputed) is at least 21 days old.
 
-            GATE 1 -- dwell time. The issue must have been open at least
-            21 days (compare createdAt to today), UNLESS Gate 2's
-            "production deployment" criterion is confirmed right now --
-            shipped-and-usable beats a 21-day wait.
-
-            GATE 2 -- evidence, re-verified fresh right now via WebSearch
-            + WebFetch. Do NOT just trust the issue body -- search again.
-            At least 2 of these 4 must be independently confirmable with
-            a source you can cite:
-              A. Independent corroboration: discussed by someone other
-                 than the originating lab (another paper citing it, a
-                 substantive third-party technical writeup -- not social
-                 media buzz).
-              B. Cross-lab adoption: used or replicated by a team/model
-                 different from whoever introduced it.
-              C. Production deployment: actually shipping in a model
-                 people can use today, not just an ablation table.
-              D. Structural novelty: re-read MAP.md as it exists RIGHT
-                 NOW (it may have grown since the issue was opened) --
-                 is this still a genuinely new mechanism, not already
-                 covered by an existing row?
-
-            An issue that fails Gate 1, or clears Gate 1 but has fewer
-            than 2 of the 4 Gate-2 criteria: leave it open. Post one
-            short `gh issue comment` stating which criteria are currently
-            met/unmet, so the maintainer can see progress without
-            re-researching. If an issue has been open more than ~180
-            days and still doesn't clear Gate 2, close it with
-            `gh issue close` and a comment explaining it didn't
-            accumulate enough independent evidence.
-
-            An issue that clears both gates is eligible for promotion.
-            Promote at most 2 per run -- if more than 2 clear the bar,
-            take the oldest by createdAt and leave a comment on the rest
-            noting they qualified but were deferred to next run.
+            Take at most 2 eligible issues total. If more than 2 qualify,
+            prefer BREAKTHROUGH over NOTABLE, then the older paper first.
+            Leave a comment on any deferred issue noting it qualified but
+            was deferred to next run.
 
             Before starting work on an eligible issue, run
             `gh pr list --search "<issue number> in:body" --state all`
@@ -201,9 +252,10 @@ jobs:
             7. `git add`, `git commit` (message: what was added and
                why, referencing the issue), `git push -u origin
                add-<topic-slug>`.
-            8. `gh pr create` with a body that states exactly which
-               Gate-2 criteria were met and the fresh evidence/links
-               found for each, and ends with `Closes #<issue-number>`.
+            8. `gh pr create` with a body that quotes the issue's latest
+               SOTA-assessment numbers (citation count, adoption/
+               discussion instances, production status) as the
+               justification, and ends with `Closes #<issue-number>`.
 
             Do not touch `main` directly at any point -- checkout,
             commit, and push only ever happen on the new branch. Do not
