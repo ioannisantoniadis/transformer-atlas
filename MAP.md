@@ -60,6 +60,7 @@ flowchart TD
         star["Star Attention<br/>2024"]
         ring["Ring Attention<br/>2023"]
         longformer["Longformer / Sparse<br/>2019-20"]
+        csahca["CSA / HCA<br/>2026"]
     end
 
     subgraph S5["5 . Feedforward to sparse routing"]
@@ -85,7 +86,7 @@ flowchart TD
     class transformer,gpt foundations
     class rope,alibi,yarn positional
     class rmsnorm,mhc normffn
-    class mqagqa,flash,swa,linattn,mla,star,ring,longformer attention
+    class mqagqa,flash,swa,linattn,mla,star,ring,longformer,csahca attention
     class moe moe
     class llama,mixtral,deepseekv2,qwen,gemma composed
     class kvcache,specdec,quant serving
@@ -149,8 +150,12 @@ flowchart LR
         direction TB
         mhc2["mHC<br/>DeepSeek AI"]
     end
+    subgraph Y2026["2026"]
+        direction TB
+        csahca2["CSA / HCA<br/>DeepSeek AI"]
+    end
 
-    Y2017 --> Y2019 --> Y2020 --> Y2021 --> Y2022 --> Y2023 --> Y2024 --> Y2025
+    Y2017 --> Y2019 --> Y2020 --> Y2021 --> Y2022 --> Y2023 --> Y2024 --> Y2025 --> Y2026
 ```
 
 ## 1. Foundations
@@ -187,6 +192,7 @@ flowchart LR
 | [`star-attention`](star-attention/) | NVIDIA | 2024 | [Star Attention](https://arxiv.org/abs/2411.17116) | ✅ |
 | [`ring-attention`](ring-attention/) | UC Berkeley | 2023 | [Ring Attention](https://arxiv.org/abs/2310.01889) | ✅ |
 | [`longformer-and-sparse-attention`](longformer-and-sparse-attention/) | AI2 / OpenAI | 2020 / 2019 | [Longformer](https://arxiv.org/abs/2004.05150), [Sparse Transformer](https://arxiv.org/abs/1904.10509) | ✅ |
+| [`compressed-sparse-attention`](compressed-sparse-attention/) (CSA/HCA) | DeepSeek AI | 2026 | [DeepSeek-V4](https://arxiv.org/abs/2606.19348) | ✅ |
 
 ## 5. Mixture of Experts
 
