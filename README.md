@@ -13,7 +13,12 @@ changed, why, who did it, and how does it actually work?"**
 
 - [`MAP.md`](MAP.md) — the full taxonomy: every architecture/technique in
   scope, grouped by category, with paper links and a build-status marker.
-  This is the map; the folders below are the territory.
+  This is the map; the folders below are the territory. It opens with two
+  diagrams — where each technique sits in a forward pass, and who shipped
+  what when.
+- An [interactive version](https://claude.ai/code/artifact/c5edf997-1e8c-402b-934e-8276d8473216)
+  of both diagrams (clickable, filterable by category) is also available —
+  private by default, ask if you'd like it shared.
 - Pick any topic folder. Each one is self-contained:
   - `README.md` — plain-language intuition, the key equation(s), a diagram,
     what problem it solves relative to the baseline, and links to the

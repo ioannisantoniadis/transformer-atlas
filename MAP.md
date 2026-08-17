@@ -14,6 +14,138 @@ deliberately excludes encoder-only models (BERT), encoder-decoder models
 DPO) that aren't architecture per se — see [README.md](README.md) for the
 full scope rationale.
 
+## Visual map
+
+The tables below are the source of truth; these two diagrams are the same
+23 topics read two other ways.
+
+**Where each technique sits in a forward pass** — every row below modifies
+one stage of the same decoder-only block, in the order data actually flows
+through it:
+
+```mermaid
+flowchart TD
+    classDef foundations fill:#3b5166,color:#fff,stroke:#25384a
+    classDef positional fill:#3f7d6e,color:#fff,stroke:#2b5a4f
+    classDef normffn fill:#7a5f96,color:#fff,stroke:#5a4570
+    classDef attention fill:#c05f24,color:#fff,stroke:#8f4419
+    classDef moe fill:#a6433f,color:#fff,stroke:#7a302d
+    classDef composed fill:#4f7a3f,color:#fff,stroke:#385a2d
+    classDef serving fill:#a67c1e,color:#fff,stroke:#7a5c15
+
+    subgraph S1["1 . Token input and baseline block"]
+        transformer["transformer<br/>Google Brain, 2017"]
+        gpt["gpt GPT-2/3<br/>OpenAI, 2019-20"]
+    end
+
+    subgraph S2["2 . Positional encoding"]
+        rope["RoPE<br/>2021"]
+        alibi["ALiBi<br/>2021"]
+        yarn["YaRN / RoPE scaling<br/>2023"]
+    end
+
+    subgraph S3["3 . Normalization and feedforward"]
+        rmsnorm["RMSNorm + SwiGLU<br/>2019-20"]
+    end
+
+    subgraph S4["4 . Attention mechanism"]
+        mqagqa["MQA / GQA<br/>2019-23"]
+        flash["FlashAttention<br/>2022"]
+        swa["Sliding-Window Attention<br/>2023"]
+        linattn["Linear Attention<br/>2020"]
+        mla["Multi-Head Latent Attention<br/>2024"]
+        star["Star Attention<br/>2024"]
+        ring["Ring Attention<br/>2023"]
+        longformer["Longformer / Sparse<br/>2019-20"]
+    end
+
+    subgraph S5["5 . Feedforward to sparse routing"]
+        moe["Mixture of Experts<br/>2017-24"]
+    end
+
+    subgraph S6["6 . Full model architectures"]
+        llama["LLaMA<br/>2023"]
+        mixtral["Mixtral<br/>2024"]
+        deepseekv2["DeepSeek-V2<br/>2024"]
+        qwen["Qwen<br/>2023-24"]
+        gemma["Gemma<br/>2024"]
+    end
+
+    subgraph S7["7 . Inference-time serving"]
+        kvcache["KV Caching + PagedAttention<br/>2023"]
+        specdec["Speculative Decoding<br/>2023"]
+        quant["Quantization GPTQ/AWQ<br/>2022-23"]
+    end
+
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7
+
+    class transformer,gpt foundations
+    class rope,alibi,yarn positional
+    class rmsnorm normffn
+    class mqagqa,flash,swa,linattn,mla,star,ring,longformer attention
+    class moe moe
+    class llama,mixtral,deepseekv2,qwen,gemma composed
+    class kvcache,specdec,quant serving
+```
+
+**Who shipped what, when** — the same techniques ordered by publication
+year instead of by pipeline stage:
+
+```mermaid
+flowchart LR
+    subgraph Y2017["2017"]
+        direction TB
+        transformer2["Transformer<br/>Google Brain"]
+        moe2["MoE gating<br/>Google"]
+    end
+    subgraph Y2019["2019"]
+        direction TB
+        gpt2["GPT-2<br/>OpenAI"]
+        rmsnorm2["RMSNorm<br/>-"]
+        mqa2["MQA<br/>Google"]
+        sparse2["Sparse Transformer<br/>OpenAI"]
+    end
+    subgraph Y2020["2020"]
+        direction TB
+        longformer2["Longformer<br/>AI2"]
+        linattn2["Linear Attention<br/>Idiap/Google"]
+        swiglu2["GLU Variants<br/>Google"]
+    end
+    subgraph Y2021["2021"]
+        direction TB
+        rope2["RoPE<br/>Zhuiyi"]
+        alibi2["ALiBi<br/>UW/FAIR"]
+        switch2["Switch Transformer<br/>Google"]
+    end
+    subgraph Y2022["2022"]
+        direction TB
+        flash2["FlashAttention<br/>Stanford"]
+        gptq2["GPTQ<br/>IST Austria"]
+    end
+    subgraph Y2023["2023"]
+        direction TB
+        llama2["LLaMA<br/>Meta"]
+        gqa2["GQA<br/>Google"]
+        swa2["Sliding-Window<br/>Mistral AI"]
+        yarn2["YaRN<br/>Meta/Nous"]
+        ring2["Ring Attention<br/>UC Berkeley"]
+        kvcache2["PagedAttention<br/>UC Berkeley"]
+        specdec2["Speculative Decoding<br/>Google/DeepMind"]
+        awq2["AWQ<br/>MIT"]
+        qwen2["Qwen<br/>Alibaba"]
+    end
+    subgraph Y2024["2024"]
+        direction TB
+        mixtral2["Mixtral<br/>Mistral AI"]
+        deepseekv22["DeepSeek-V2 + MLA<br/>DeepSeek AI"]
+        star2["Star Attention<br/>NVIDIA"]
+        gemma2["Gemma<br/>Google DeepMind"]
+        deepseekmoe2["DeepSeekMoE<br/>DeepSeek AI"]
+    end
+
+    Y2017 --> Y2019 --> Y2020 --> Y2021 --> Y2022 --> Y2023 --> Y2024
+```
+
 ## 1. Foundations
 
 | Topic | Lab | Year | Paper | Status |
