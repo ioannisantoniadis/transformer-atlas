@@ -79,13 +79,24 @@ jobs:
             evidence-based grade the maintainer reads instead of trusting
             either of our judgment calls.
 
+            Bash rule: every command you run must be a plain literal
+            string -- no command substitution (`$(...)` or backticks)
+            and no shell arithmetic (`$((...))`) referencing a variable.
+            Claude Code's Bash tool blocks both categorically, regardless
+            of the allowlist. Do any date math or counting yourself, as
+            reasoning, and only ever pass fixed literal values into
+            commands.
+
             For each such issue:
 
             1. Paper age: determine the paper's first public date (arXiv
                submission date, or the lab's own announcement date if
                there's no preprint) via WebFetch on its paper page. This
                -- NOT when the GitHub issue was opened -- is the clock
-               that matters. Compute its age in days from today.
+               that matters. Get today's date with the plain literal
+               command `date -u +%Y-%m-%d`, then work out the age in days
+               yourself as reasoning from the two dates -- do not use
+               `date -d`/arithmetic expansion to compute the difference.
 
             2. Citation count -- a real, independently-checkable number,
                not an estimate: run
@@ -129,12 +140,16 @@ jobs:
             specific discussions found (with links), production status,
             and the resulting grade with a one-line justification.
 
-            Then sync the issue's grade label to match: remove any
-            existing `grade:*` label from the issue (`gh issue edit
-            --remove-label`) and add the correct one -- `grade:watching`,
-            `grade:emerging`, `grade:notable`, or `grade:breakthrough`
-            (`gh issue edit --add-label`, creating the label first via
-            `gh label create` the first time each is needed).
+            Then sync the issue's grade label to match, in one literal
+            command that removes all four possible grade labels and adds
+            back only the correct one (removing a label the issue
+            doesn't have is a harmless no-op, so there's no need to
+            check which one is currently set first):
+
+              gh issue edit <n> --remove-label grade:watching --remove-label grade:emerging --remove-label grade:notable --remove-label grade:breakthrough --add-label grade:<correct-one>
+
+            (create each label the first time it's needed, via
+            `gh label create`, before referencing it).
 
             Backlog hygiene: if the paper is more than ~180 days old and
             the issue is still graded WATCHING or EMERGING, close it via
@@ -178,6 +193,15 @@ jobs:
             (scope, structure) and MAP.md (current coverage, both tables
             and the two Mermaid diagrams at the top) before doing
             anything else.
+
+            Bash rule: every command you run must be a plain literal
+            string -- no command substitution (`$(...)` or backticks)
+            and no shell arithmetic (`$((...))`) referencing a variable.
+            Claude Code's Bash tool blocks both categorically, regardless
+            of the allowlist. Do any date math yourself, as reasoning
+            (get today's date via the plain literal `date -u +%Y-%m-%d`
+            if needed), and only ever pass fixed literal values into
+            commands.
 
             Task: promote issues the scan job that just ran has already
             graded NOTABLE or BREAKTHROUGH, by opening a PR for each.
