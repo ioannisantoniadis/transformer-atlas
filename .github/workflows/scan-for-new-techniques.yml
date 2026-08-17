@@ -2,7 +2,14 @@ name: Scan for new architecture techniques
 
 on:
   schedule:
-    - cron: "0 9 1 * *" # 09:00 UTC on the 1st of each month
+    - cron: "0 9 * * 1" # 09:00 UTC every Monday -- small, frequent batches
+                         # instead of one big monthly one. This shares Claude
+                         # usage limits with any interactive Claude Code
+                         # session on the same account/subscription, so
+                         # smaller/more-frequent runs mean a rate-limit hit
+                         # (see assess/promote's is_error handling) costs a
+                         # few days of delay on a couple of issues, not a
+                         # whole month's backlog.
   workflow_dispatch: {} # allow manual runs from the Actions tab
 
 jobs:
@@ -32,7 +39,9 @@ jobs:
             OpenAI, Meta, Mistral AI, DeepSeek, NVIDIA, Anthropic, Alibaba,
             and similar) that are NOT already in MAP.md, published or
             having clearly crossed into mainstream/widely-cited adoption
-            in roughly the last 35 days.
+            in roughly the last 10 days (this runs weekly, so a slight
+            overlap with last run's window is fine and cheaper than
+            re-sweeping a whole month every time).
 
             Stay inside this repo's stated scope: decoder-only LLM
             architecture and inference-serving techniques only. Skip
@@ -58,7 +67,7 @@ jobs:
             first, so you don't propose the same technique twice across
             runs.
 
-            For each qualifying candidate (cap at 5 per run), open one
+            For each qualifying candidate (cap at 3 per run), open one
             GitHub issue via `gh issue create` with:
               - Title: "New technique: <name> (<lab>, <year>)"
               - Body: what it is, why it's a candidate, links to the
@@ -111,7 +120,7 @@ jobs:
             reasoning, and only ever pass fixed literal values into
             commands.
 
-            ## Pick this run's batch (cap: 3 issues)
+            ## Pick this run's batch (cap: 2 issues)
 
             Run `gh issue list --label candidate-technique --state open --json number,title,createdAt`
             to see all open candidates. For each, check
@@ -119,7 +128,7 @@ jobs:
             for a comment starting with the exact line
             `### SOTA assessment` -- that's a prior assessment.
 
-            Select up to 3 issues to assess this run, in this priority
+            Select up to 2 issues to assess this run, in this priority
             order: (1) issues with no SOTA-assessment comment yet -- never
             assessed, most urgent; (2) then issues whose most recent
             SOTA-assessment comment is oldest. Leave the rest for next
