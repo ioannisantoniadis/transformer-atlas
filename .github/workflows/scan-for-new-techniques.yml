@@ -74,10 +74,11 @@ jobs:
             ever writes issues.
           claude_args: |
             --allowedTools "Read,Glob,Grep,TodoWrite,WebSearch,WebFetch,Bash(gh issue list:*),Bash(gh issue create:*),Bash(gh label create:*),Bash(gh label list:*)"
-            --max-turns 40
+            --max-turns 100
 
   assess:
     needs: discover
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -200,10 +201,11 @@ jobs:
             ever writes comments and labels.
           claude_args: |
             --allowedTools "Read,Glob,Grep,TodoWrite,WebSearch,WebFetch,Bash(curl:*),Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh issue close:*),Bash(gh label create:*),Bash(gh label list:*)"
-            --max-turns 60
+            --max-turns 100
 
   promote:
     needs: assess
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -326,4 +328,4 @@ jobs:
             rebase, force-push, or amend.
           claude_args: |
             --allowedTools "Read,Glob,Grep,TodoWrite,Edit,Write,WebSearch,WebFetch,Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh issue close:*),Bash(gh pr list:*),Bash(gh pr create:*),Bash(git checkout:*),Bash(git config:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(python3:*)"
-            --max-turns 60
+            --max-turns 100
