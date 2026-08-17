@@ -34,14 +34,30 @@ jobs:
             the scope statement and MAP.md for the full list of what's
             already covered (both tables and the two diagrams at the top).
 
-            Find genuinely new or newly-mainstream transformer
-            architecture techniques from major AI labs (Google/DeepMind,
-            OpenAI, Meta, Mistral AI, DeepSeek, NVIDIA, Anthropic, Alibaba,
-            and similar) that are NOT already in MAP.md, published or
-            having clearly crossed into mainstream/widely-cited adoption
-            in roughly the last 10 days (this runs weekly, so a slight
-            overlap with last run's window is fine and cheaper than
-            re-sweeping a whole month every time).
+            IMPORTANT CONTEXT ON SELECTIVITY: MAP.md currently holds
+            roughly 25 entries covering the ENTIRE history of decoder-only
+            LLM architecture from 2017 to today -- it is a highly
+            selective retrospective, not a changelog. At that density,
+            most individual weeks should surface ZERO candidates. The
+            test for flagging something is not "was this used in a
+            popular recent model" -- it's "would this earn its own
+            dedicated entry in a ~25-30-item all-time map of the field,
+            the way RoPE, FlashAttention, or MoE routing did." Most
+            technique variants shipped in any given model release do not
+            clear that bar even if the model itself is a big deal.
+
+            Find candidates that are NOT already in MAP.md and were
+            published, or first clearly crossed into mainstream/
+            widely-cited adoption, in roughly the last 10 days (this runs
+            weekly). The paper itself must be recent -- do not use "recent
+            adoption" as a loophole to reach back to a much older paper
+            just because the model that adopted it happens to have GA'd
+            recently; if the underlying paper is more than ~60 days old,
+            it does not qualify via this run's discovery regardless of
+            how newsworthy its recent adoption is (a genuinely field-
+            changing older technique that was somehow missed will still
+            surface on a later run, or can be added by the maintainer
+            directly).
 
             Stay inside this repo's stated scope: decoder-only LLM
             architecture and inference-serving techniques only. Skip
@@ -50,11 +66,16 @@ jobs:
             minor version bumps -- README.md documents this boundary,
             follow it exactly.
 
-            Bar for flagging something: it must be a genuinely new
-            architectural technique, or an existing one that has clearly
-            become mainstream/widely cited -- not routine research noise.
-            If nothing meets that bar, do nothing and exit; do not open a
-            placeholder or empty issue.
+            Bar for flagging something: it must introduce a genuinely new
+            architectural primitive, not a variant, scale-up, or
+            recombination of mechanisms already covered by an existing
+            MAP.md row. Re-read MAP.md's current rows before deciding --
+            if what you found is describable as "X but bigger" or "X
+            applied to Y" for an existing row X, it does not qualify. If
+            nothing meets that bar, do nothing and exit -- zero new issues
+            is the expected, normal outcome of most runs; do not open a
+            placeholder or empty issue, and do not stretch to fill a
+            quota.
 
             Verification: a WebSearch snippet is a lead, not a citation.
             For every candidate, use WebFetch to open the actual paper
@@ -169,7 +190,19 @@ jobs:
                generally-available model? Yes/no, with the model name
                and a source if yes.
 
-            Compute a grade from these numbers:
+            6. Novelty gate (MANDATORY, checked independently of the
+               numbers above): re-read MAP.md as it exists RIGHT NOW.
+               Is this still a genuinely new architectural primitive, not
+               a variant, scale-up, or recombination of a mechanism an
+               existing row already covers? Citation count and
+               production status measure attention and deployment, not
+               whether something deserves a permanent, dedicated slot in
+               a ~25-30-item all-time map of the field -- a technique can
+               be highly cited and widely shipped while still being "X
+               but bigger" for an existing row X, and that does not
+               qualify. Answer yes/no with a one-line reason either way.
+
+            Compute a grade from the numbers in steps 2-5:
               - BREAKTHROUGH: (production=yes AND citationCount >= 10)
                 OR adoption_count >= 2 OR citationCount >= 30.
               - NOTABLE: production=yes OR citationCount >= 10 OR
@@ -177,6 +210,13 @@ jobs:
               - EMERGING: citationCount >= 3 OR discussion_count >= 2.
               - WATCHING: none of the above (the default for a
                 freshly-opened issue with no independent pickup yet).
+
+            Then apply the novelty gate from step 6: if novelty = no, the
+            grade is capped at EMERGING no matter what the numbers alone
+            would give it -- NOTABLE and BREAKTHROUGH both require
+            novelty = yes, since only those two tiers are promotion-
+            eligible. State clearly in the comment whether the gate
+            applied and, if so, that it's what capped the grade.
 
             Post a comment on the issue -- every time it's assessed, even
             if the grade is unchanged from last time, so the assessment's
@@ -186,8 +226,8 @@ jobs:
             (with a link to its Semantic Scholar page, or "not yet
             indexed"), the specific adoption instances found (with
             links), the specific discussions found (with links),
-            production status, and the resulting grade with a one-line
-            justification.
+            production status, the novelty-gate verdict and reason, and
+            the resulting grade with a one-line justification.
 
             Then sync the issue's grade label to match, in one literal
             command that removes all four possible grade labels and adds
