@@ -16,9 +16,9 @@ changed, why, who did it, and how does it actually work?"**
   This is the map; the folders below are the territory. It opens with two
   diagrams — where each technique sits in a forward pass, and who shipped
   what when.
-- An [interactive version](https://claude.ai/code/artifact/c5edf997-1e8c-402b-934e-8276d8473216)
-  of both diagrams (clickable, filterable by category) is also available —
-  private by default, ask if you'd like it shared.
+- An [interactive version](https://johnantonn.github.io/transformer-atlas/visual-map.html)
+  of both diagrams is also available — clickable, filterable by category,
+  linking straight out to each folder and paper.
 - Pick any topic folder. Each one is self-contained:
   - `README.md` — plain-language intuition, the key equation(s), a diagram,
     what problem it solves relative to the baseline, and links to the

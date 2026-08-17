@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformer Atlas</title>
+<style>
+  :root {
+    --paper: #eef1f5;
+    --paper-raised: #ffffff;
+    --ink: #151a21;
+    --ink-soft: #4b5768;
+    --ink-faint: #8592a3;
+    --line: #ccd4de;
+    --line-strong: #a8b3c0;
+    --blueprint: #1c3a5e;
+
+    --c-foundations: #3b5166;
+    --c-positional: #3f7d6e;
+    --c-normffn: #7a5f96;
+    --c-attention: #c05f24;
+    --c-moe: #a6433f;
+    --c-composed: #4f7a3f;
+    --c-serving: #a67c1e;
+
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #10141b;
+      --paper-raised: #171d27;
+      --ink: #e7ebf0;
+      --ink-soft: #a7b2c0;
+      --ink-faint: #6b7686;
+      --line: #2a323e;
+      --line-strong: #3c4655;
+      --blueprint: #7fa8d6;
+
+      --c-foundations: #7e9bb5;
+      --c-positional: #64ad9a;
+      --c-normffn: #a690c9;
+      --c-attention: #e0863f;
+      --c-moe: #d4726c;
+      --c-composed: #82b96e;
+      --c-serving: #d1a53d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #10141b;
+    --paper-raised: #171d27;
+    --ink: #e7ebf0;
+    --ink-soft: #a7b2c0;
+    --ink-faint: #6b7686;
+    --line: #2a323e;
+    --line-strong: #3c4655;
+    --blueprint: #7fa8d6;
+
+    --c-foundations: #7e9bb5;
+    --c-positional: #64ad9a;
+    --c-normffn: #a690c9;
+    --c-attention: #e0863f;
+    --c-moe: #d4726c;
+    --c-composed: #82b96e;
+    --c-serving: #d1a53d;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-attachment: local;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  header.top {
+    margin-bottom: 2.25rem;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--c-attention);
+    margin: 0 0 0.6rem;
+  }
+  h1 {
+    font-family: var(--font-mono);
+    font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.3rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.7rem;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .lede {
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+  .lede a { color: var(--blueprint); }
+
+  nav.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    align-items: center;
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+  .tabs {
+    display: inline-flex;
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+  .tabs button {
+    appearance: none;
+    border: none;
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .tabs button + button { border-left: 1px solid var(--line-strong); }
+  .tabs button[aria-pressed="true"] {
+    background: var(--blueprint);
+    color: var(--paper-raised);
+  }
+  .tabs button:focus-visible, .legend button:focus-visible, .chip:focus-visible {
+    outline: 2px solid var(--c-attention);
+    outline-offset: 2px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+  }
+  .legend button {
+    appearance: none;
+    background: none;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0;
+    color: var(--ink-soft);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .legend button .dot {
+    width: 9px; height: 9px; border-radius: 2px;
+    background: var(--dot);
+    flex: none;
+  }
+  .legend button[data-dim="true"] { opacity: 0.35; }
+
+  section.view { display: none; }
+  section.view.active { display: block; }
+
+  /* Timeline */
+  .timeline { position: relative; margin-top: 2.5rem; }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 3.6rem;
+    top: 0.4rem; bottom: 0.4rem;
+    width: 1px;
+    background: var(--line-strong);
+  }
+  .year-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.6rem 1fr;
+    gap: 1rem;
+    padding: 1.1rem 0;
+  }
+  .year-row + .year-row { border-top: 1px dashed var(--line); }
+  .year-label {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--ink);
+    text-align: right;
+    padding-right: 0.9rem;
+    position: relative;
+  }
+  .year-label::after {
+    content: "";
+    position: absolute;
+    right: -4px; top: 50%;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--blueprint);
+    transform: translate(50%, -50%);
+  }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+
+  /* Pipeline */
+  .pipeline { margin-top: 2.5rem; position: relative; }
+  .stage {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.6rem 1fr;
+    gap: 1rem;
+    padding-bottom: 2.1rem;
+  }
+  .stage:last-child { padding-bottom: 0; }
+  .stage-rail {
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+  .stage-rail::before {
+    content: "";
+    position: absolute;
+    top: 0.3rem; bottom: -1.8rem;
+    width: 1px;
+    background: var(--line-strong);
+  }
+  .stage:last-child .stage-rail::before { display: none; }
+  .stage-num {
+    position: relative;
+    z-index: 1;
+    width: 1.9rem; height: 1.9rem;
+    border-radius: 50%;
+    background: var(--paper-raised);
+    border: 1px solid var(--stage-color);
+    color: var(--stage-color);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pulse {
+    position: absolute;
+    left: 50%; top: 0;
+    width: 7px; height: 7px;
+    margin-left: -3.5px;
+    border-radius: 50%;
+    background: var(--c-attention);
+    box-shadow: 0 0 8px 1px var(--c-attention);
+    animation: travel 7s linear infinite;
+  }
+  @keyframes travel {
+    0% { top: 0%; opacity: 0; }
+    4% { opacity: 1; }
+    96% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  .stage-body {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--stage-color);
+    border-radius: 4px;
+    padding: 1rem 1.1rem 1.1rem;
+  }
+  .stage-title {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--stage-color);
+    margin: 0 0 0.2rem;
+  }
+  .stage-desc {
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    margin: 0 0 0.8rem;
+    max-width: 68ch;
+  }
+
+  /* Chip (shared) */
+  .chip {
+    --chip-color: var(--blueprint);
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--chip-color);
+    border-radius: 3px;
+    padding: 0.45rem 0.65rem 0.4rem;
+    min-width: 9.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  }
+  .chip:hover, .chip:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--chip-color);
+    box-shadow: 0 4px 10px -4px rgba(0,0,0,0.35);
+  }
+  .chip[data-dim="true"] { opacity: 0.25; pointer-events: none; }
+  .chip-name {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+  .chip-meta {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.01em;
+  }
+  .chip-paper {
+    font-size: 0.66rem;
+    color: var(--chip-color);
+    margin-top: 0.2rem;
+  }
+
+  footer.foot {
+    margin-top: 3.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+  }
+  footer.foot a { color: var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">transformer-atlas / visual map</p>
+    <h1>From "Attention Is All You Need" to today's serving stack</h1>
+    <p class="lede">Two ways to read the same 23 techniques: <strong>Timeline</strong> orders them by publication
+      year, so you can see who shipped what and when. <strong>Pipeline</strong> orders them by where they sit in a
+      decoder-only forward pass, from token input to production serving. Click any chip to open its folder in
+      <a href="https://github.com/johnantonn/transformer-atlas" target="_blank" rel="noopener">transformer-atlas</a>;
+      the small link opens the source paper.</p>
+    <nav class="controls">
+      <div class="tabs" role="tablist" aria-label="View">
+        <button type="button" data-view="pipeline" aria-pressed="true">Pipeline</button>
+        <button type="button" data-view="timeline" aria-pressed="false">Timeline</button>
+      </div>
+      <div class="legend" id="legend"></div>
+    </nav>
+  </header>
+
+  <section class="view active" id="view-pipeline"></section>
+  <section class="view" id="view-timeline"></section>
+
+  <footer class="foot">
+    transformer-atlas — see <a href="https://github.com/johnantonn/transformer-atlas/blob/main/MAP.md" target="_blank" rel="noopener">MAP.md</a> for the full write-ups.
+  </footer>
+</div>
+
+<script>
+  const REPO = "https://github.com/johnantonn/transformer-atlas/tree/main/";
+
+  const CATEGORIES = [
+    { id: "foundations", label: "Foundations",              color: "var(--c-foundations)" },
+    { id: "positional",  label: "Positional Encoding",       color: "var(--c-positional)"  },
+    { id: "normffn",     label: "Normalization & FFN",       color: "var(--c-normffn)"     },
+    { id: "attention",   label: "Attention & Efficiency",    color: "var(--c-attention)"   },
+    { id: "moe",         label: "Mixture of Experts",        color: "var(--c-moe)"         },
+    { id: "composed",    label: "Full Architectures",        color: "var(--c-composed)"    },
+    { id: "serving",     label: "Inference Serving",         color: "var(--c-serving)"     },
+  ];
+
+  const STAGES = [
+    { cat: "foundations", title: "Token input & baseline block",
+      desc: "The original encoder-decoder Transformer and the decoder-only reduction (GPT) that every later row modifies one piece of." },
+    { cat: "positional",  title: "Positional encoding",
+      desc: "How token order enters the model, and how that scheme is stretched to contexts far longer than it was trained on." },
+    { cat: "normffn",     title: "Normalization & feedforward",
+      desc: "The non-attention half of each block: how activations are normalized and how the feedforward sublayer is shaped." },
+    { cat: "attention",   title: "Attention mechanism",
+      desc: "Same job as baseline attention — mix information across positions — computed with less memory, less compute, or across more devices." },
+    { cat: "moe",         title: "Feedforward → sparse routing",
+      desc: "Replaces the dense feedforward sublayer with many small experts and a router, trading a larger parameter count for constant per-token compute." },
+    { cat: "composed",    title: "Full model architectures",
+      desc: "Shipped systems — specific combinations of the rows above, not new primitives." },
+    { cat: "serving",     title: "Inference-time serving",
+      desc: "Applied after training, around the whole model, to make generation cheaper and faster to run in production." },
+  ];
+
+  const ITEMS = [
+    { id: "transformer", name: "Transformer", lab: "Google Brain", year: 2017, yearLabel: "2017", cat: "foundations",
+      paper: "https://arxiv.org/abs/1706.03762" },
+    { id: "gpt", name: "GPT-2 / GPT-3", lab: "OpenAI", year: 2019, yearLabel: "2019–20", cat: "foundations",
+      paper: "https://arxiv.org/abs/2005.14165" },
+
+    { id: "rotary-position-embedding", name: "RoPE", lab: "Zhuiyi / EleutherAI", year: 2021, yearLabel: "2021", cat: "positional",
+      paper: "https://arxiv.org/abs/2104.09864" },
+    { id: "alibi", name: "ALiBi", lab: "UW / FAIR", year: 2021, yearLabel: "2021", cat: "positional",
+      paper: "https://arxiv.org/abs/2108.12409" },
+    { id: "yarn-and-rope-scaling", name: "YaRN & RoPE scaling", lab: "Meta / Nous Research", year: 2023, yearLabel: "2023", cat: "positional",
+      paper: "https://arxiv.org/abs/2309.00071" },
+
+    { id: "rmsnorm-and-swiglu", name: "RMSNorm + SwiGLU", lab: "– / Google", year: 2019, yearLabel: "2019–20", cat: "normffn",
+      paper: "https://arxiv.org/abs/1910.07467" },
+
+    { id: "multi-query-and-grouped-query-attention", name: "MQA / GQA", lab: "Google", year: 2019, yearLabel: "2019–23", cat: "attention",
+      paper: "https://arxiv.org/abs/2305.13245" },
+    { id: "flash-attention", name: "FlashAttention", lab: "Stanford", year: 2022, yearLabel: "2022", cat: "attention",
+      paper: "https://arxiv.org/abs/2205.14135" },
+    { id: "sliding-window-attention", name: "Sliding-Window Attention", lab: "Mistral AI", year: 2023, yearLabel: "2023", cat: "attention",
+      paper: "https://arxiv.org/abs/2310.06825" },
+    { id: "linear-attention", name: "Linear Attention", lab: "Idiap / Google", year: 2020, yearLabel: "2020", cat: "attention",
+      paper: "https://arxiv.org/abs/2006.16236" },
+    { id: "multi-head-latent-attention", name: "Multi-Head Latent Attention", lab: "DeepSeek AI", year: 2024, yearLabel: "2024", cat: "attention",
+      paper: "https://arxiv.org/abs/2405.04434" },
+    { id: "star-attention", name: "Star Attention", lab: "NVIDIA", year: 2024, yearLabel: "2024", cat: "attention",
+      paper: "https://arxiv.org/abs/2411.17116" },
+    { id: "ring-attention", name: "Ring Attention", lab: "UC Berkeley", year: 2023, yearLabel: "2023", cat: "attention",
+      paper: "https://arxiv.org/abs/2310.01889" },
+    { id: "longformer-and-sparse-attention", name: "Longformer / Sparse Attention", lab: "AI2 / OpenAI", year: 2019, yearLabel: "2019–20", cat: "attention",
+      paper: "https://arxiv.org/abs/2004.05150" },
+
+    { id: "mixture-of-experts", name: "Mixture of Experts", lab: "Google / DeepSeek", year: 2017, yearLabel: "2017–24", cat: "moe",
+      paper: "https://arxiv.org/abs/2101.03961" },
+
+    { id: "llama", name: "LLaMA", lab: "Meta", year: 2023, yearLabel: "2023", cat: "composed",
+      paper: "https://arxiv.org/abs/2302.13971" },
+    { id: "mixtral", name: "Mixtral", lab: "Mistral AI", year: 2024, yearLabel: "2024", cat: "composed",
+      paper: "https://arxiv.org/abs/2401.04088" },
+    { id: "deepseek-v2", name: "DeepSeek-V2", lab: "DeepSeek AI", year: 2024, yearLabel: "2024", cat: "composed",
+      paper: "https://arxiv.org/abs/2405.04434" },
+    { id: "qwen", name: "Qwen", lab: "Alibaba", year: 2023, yearLabel: "2023–24", cat: "composed",
+      paper: "https://arxiv.org/abs/2309.16609" },
+    { id: "gemma", name: "Gemma", lab: "Google DeepMind", year: 2024, yearLabel: "2024", cat: "composed",
+      paper: "https://arxiv.org/abs/2403.08295" },
+
+    { id: "kv-caching-and-paged-attention", name: "KV Caching + PagedAttention", lab: "– / UC Berkeley", year: 2023, yearLabel: "2023", cat: "serving",
+      paper: "https://arxiv.org/abs/2309.06180" },
+    { id: "speculative-decoding", name: "Speculative Decoding", lab: "Google / DeepMind", year: 2023, yearLabel: "2023", cat: "serving",
+      paper: "https://arxiv.org/abs/2211.17192" },
+    { id: "quantization-for-inference", name: "Quantization (GPTQ / AWQ)", lab: "IST Austria / MIT", year: 2022, yearLabel: "2022–23", cat: "serving",
+      paper: "https://arxiv.org/abs/2210.17323" },
+  ];
+
+  const catColor = id => `var(--c-${id})`;
+  const catMeta = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
+
+  function chip(item) {
+    const a = document.createElement("a");
+    a.className = "chip";
+    a.href = REPO + item.id + "/";
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.dataset.cat = item.cat;
+    a.style.setProperty("--chip-color", catColor(item.cat));
+    a.innerHTML = `
+      <span class="chip-name">${item.name}</span>
+      <span class="chip-meta">${item.lab} — ${item.yearLabel}</span>
+      <span class="chip-paper" data-paper-link>↗ paper</span>
+    `;
+    const paperLink = a.querySelector("[data-paper-link]");
+    paperLink.addEventListener("click", e => {
+      e.preventDefault();
+      e.stopPropagation();
+      window.open(item.paper, "_blank", "noopener");
+    });
+    return a;
+  }
+
+  function renderLegend() {
+    const el = document.getElementById("legend");
+    CATEGORIES.forEach(c => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.cat = c.id;
+      b.innerHTML = `<span class="dot" style="--dot:${catColor(c.id)}"></span>${c.label}`;
+      b.addEventListener("click", () => toggleFilter(c.id));
+      el.appendChild(b);
+    });
+  }
+
+  let activeFilter = null;
+  function toggleFilter(catId) {
+    activeFilter = activeFilter === catId ? null : catId;
+    document.querySelectorAll(".legend button").forEach(b => {
+      b.dataset.dim = activeFilter && b.dataset.cat !== activeFilter ? "true" : "false";
+    });
+    document.querySelectorAll(".chip").forEach(c => {
+      c.dataset.dim = activeFilter && c.dataset.cat !== activeFilter ? "true" : "false";
+    });
+  }
+
+  function renderPipeline() {
+    const el = document.getElementById("view-pipeline");
+    const pipe = document.createElement("div");
+    pipe.className = "pipeline";
+    STAGES.forEach((stage, i) => {
+      const items = ITEMS.filter(it => it.cat === stage.cat);
+      const s = document.createElement("div");
+      s.className = "stage";
+      const rail = document.createElement("div");
+      rail.className = "stage-rail";
+      rail.style.setProperty("--stage-color", catColor(stage.cat));
+      rail.innerHTML = `<span class="stage-num">${String(i + 1).padStart(2, "0")}</span>` +
+        (i === 0 ? `<span class="pulse"></span>` : "");
+      const body = document.createElement("div");
+      body.className = "stage-body";
+      body.style.setProperty("--stage-color", catColor(stage.cat));
+      body.innerHTML = `<p class="stage-title">Stage ${String(i + 1).padStart(2, "0")} — ${stage.title}</p>
+        <p class="stage-desc">${stage.desc}</p>`;
+      const row = document.createElement("div");
+      row.className = "chip-row";
+      items.forEach(it => row.appendChild(chip(it)));
+      body.appendChild(row);
+      s.appendChild(rail);
+      s.appendChild(body);
+      pipe.appendChild(s);
+    });
+    el.appendChild(pipe);
+  }
+
+  function renderTimeline() {
+    const el = document.getElementById("view-timeline");
+    const tl = document.createElement("div");
+    tl.className = "timeline";
+    const years = [...new Set(ITEMS.map(i => i.year))].sort((a, b) => a - b);
+    years.forEach(year => {
+      const row = document.createElement("div");
+      row.className = "year-row";
+      const label = document.createElement("div");
+      label.className = "year-label";
+      label.textContent = year;
+      const chips = document.createElement("div");
+      chips.className = "chip-row";
+      ITEMS.filter(it => it.year === year).forEach(it => chips.appendChild(chip(it)));
+      row.appendChild(label);
+      row.appendChild(chips);
+      tl.appendChild(row);
+    });
+    el.appendChild(tl);
+  }
+
+  document.querySelectorAll(".tabs button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-pressed", "false"));
+      btn.setAttribute("aria-pressed", "true");
+      document.querySelectorAll("section.view").forEach(v => v.classList.remove("active"));
+      document.getElementById("view-" + btn.dataset.view).classList.add("active");
+    });
+  });
+
+  renderLegend();
+  renderPipeline();
+  renderTimeline();
+</script>
+</body>
+</html>

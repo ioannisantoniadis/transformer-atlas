@@ -17,7 +17,9 @@ full scope rationale.
 ## Visual map
 
 The tables below are the source of truth; these two diagrams are the same
-23 topics read two other ways.
+23 topics read two other ways. There's also an
+[interactive version](https://johnantonn.github.io/transformer-atlas/visual-map.html)
+of both, with click-through to each folder and paper.
 
 **Where each technique sits in a forward pass** — every row below modifies
 one stage of the same decoder-only block, in the order data actually flows
