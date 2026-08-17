@@ -111,7 +111,7 @@ jobs:
             reasoning, and only ever pass fixed literal values into
             commands.
 
-            ## Pick this run's batch (cap: 4 issues)
+            ## Pick this run's batch (cap: 3 issues)
 
             Run `gh issue list --label candidate-technique --state open --json number,title,createdAt`
             to see all open candidates. For each, check
@@ -119,7 +119,7 @@ jobs:
             for a comment starting with the exact line
             `### SOTA assessment` -- that's a prior assessment.
 
-            Select up to 4 issues to assess this run, in this priority
+            Select up to 3 issues to assess this run, in this priority
             order: (1) issues with no SOTA-assessment comment yet -- never
             assessed, most urgent; (2) then issues whose most recent
             SOTA-assessment comment is oldest. Leave the rest for next
@@ -201,7 +201,7 @@ jobs:
             ever writes comments and labels.
           claude_args: |
             --allowedTools "Read,Glob,Grep,TodoWrite,WebSearch,WebFetch,Bash(curl:*),Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh issue close:*),Bash(gh label create:*),Bash(gh label list:*)"
-            --max-turns 100
+            --max-turns 150
 
   promote:
     needs: assess
