@@ -17,7 +17,7 @@ full scope rationale.
 ## Visual map
 
 The tables below are the source of truth; these two diagrams are the same
-26 topics read two other ways. There's also an
+27 topics read two other ways. There's also an
 [interactive version](https://johnantonn.github.io/transformer-atlas/visual-map.html)
 of both, with click-through to each folder and paper.
 
@@ -49,6 +49,7 @@ flowchart TD
     subgraph S3["3 . Normalization and feedforward"]
         rmsnorm["RMSNorm + SwiGLU<br/>2019-20"]
         mhc["mHC<br/>2025"]
+        attnres["Attention Residuals<br/>2026"]
     end
 
     subgraph S4["4 . Attention mechanism"]
@@ -86,7 +87,7 @@ flowchart TD
 
     class transformer,gpt foundations
     class rope,alibi,yarn positional
-    class rmsnorm,mhc normffn
+    class rmsnorm,mhc,attnres normffn
     class mqagqa,flash,swa,linattn,mla,star,ring,longformer,csahca,kda attention
     class moe moe
     class llama,mixtral,deepseekv2,qwen,gemma composed
@@ -156,6 +157,7 @@ flowchart LR
     subgraph Y2026["2026"]
         direction TB
         csahca2["CSA / HCA<br/>DeepSeek AI"]
+        attnres2["Attention Residuals<br/>Moonshot AI/Kimi"]
     end
 
     Y2017 --> Y2019 --> Y2020 --> Y2021 --> Y2022 --> Y2023 --> Y2024 --> Y2025 --> Y2026
@@ -182,6 +184,7 @@ flowchart LR
 |---|---|---|---|---|
 | [`rmsnorm-and-swiglu`](rmsnorm-and-swiglu/) | - / Google | 2019 / 2020 | [RMSNorm](https://arxiv.org/abs/1910.07467), [GLU Variants](https://arxiv.org/abs/2002.05202) | ✅ |
 | [`manifold-constrained-hyper-connections`](manifold-constrained-hyper-connections/) (mHC) | DeepSeek AI | 2025 | [mHC](https://arxiv.org/abs/2512.24880) | ✅ |
+| [`attention-residuals`](attention-residuals/) (AttnRes) | Moonshot AI / Kimi | 2026 | [Attention Residuals](https://arxiv.org/abs/2603.15031) | ✅ |
 
 ## 4. Attention Mechanisms & Efficiency Variants
 
