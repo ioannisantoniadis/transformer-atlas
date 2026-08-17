@@ -26,8 +26,8 @@ full scope rationale.
 | Topic | Lab | Year | Paper | Status |
 |---|---|---|---|---|
 | [`rotary-position-embedding`](rotary-position-embedding/) (RoPE) | Zhuiyi / EleutherAI-adopted | 2021 | [RoFormer](https://arxiv.org/abs/2104.09864) | ✅ |
-| `alibi` | UW / FAIR | 2021 | [Train Short, Test Long](https://arxiv.org/abs/2108.12409) | 🔲 |
-| `yarn-and-rope-scaling` | - | 2023 | [YaRN](https://arxiv.org/abs/2309.00071) | 🔲 |
+| [`alibi`](alibi/) | UW / FAIR | 2021 | [Train Short, Test Long](https://arxiv.org/abs/2108.12409) | ✅ |
+| [`yarn-and-rope-scaling`](yarn-and-rope-scaling/) | Meta / Nous Research et al. | 2023 | [Position Interpolation](https://arxiv.org/abs/2306.15595), [YaRN](https://arxiv.org/abs/2309.00071) | ✅ |
 
 ## 3. Normalization & Feedforward Blocks
 
@@ -45,8 +45,8 @@ full scope rationale.
 | [`linear-attention`](linear-attention/) | Idiap / Google | 2020 | [Linear Transformers](https://arxiv.org/abs/2006.16236), [Performer](https://arxiv.org/abs/2009.14794) | ✅ |
 | [`multi-head-latent-attention`](multi-head-latent-attention/) (MLA) | DeepSeek AI | 2024 | [DeepSeek-V2](https://arxiv.org/abs/2405.04434) | ✅ |
 | [`star-attention`](star-attention/) | NVIDIA | 2024 | [Star Attention](https://arxiv.org/abs/2411.17116) | ✅ |
-| `ring-attention` | UC Berkeley | 2023 | [Ring Attention](https://arxiv.org/abs/2310.01889) | 🔲 |
-| `longformer-and-sparse-attention` | AI2 | 2020 | [Longformer](https://arxiv.org/abs/2004.05150) | 🔲 |
+| [`ring-attention`](ring-attention/) | UC Berkeley | 2023 | [Ring Attention](https://arxiv.org/abs/2310.01889) | ✅ |
+| [`longformer-and-sparse-attention`](longformer-and-sparse-attention/) | AI2 / OpenAI | 2020 / 2019 | [Longformer](https://arxiv.org/abs/2004.05150), [Sparse Transformer](https://arxiv.org/abs/1904.10509) | ✅ |
 
 ## 5. Mixture of Experts
 
@@ -61,16 +61,16 @@ full scope rationale.
 | [`llama`](llama/) | Meta | 2023 | [LLaMA](https://arxiv.org/abs/2302.13971), [LLaMA 2](https://arxiv.org/abs/2307.09288) | ✅ |
 | [`mixtral`](mixtral/) | Mistral AI | 2024 | [Mixtral of Experts](https://arxiv.org/abs/2401.04088) | ✅ |
 | [`deepseek-v2`](deepseek-v2/) | DeepSeek AI | 2024 | [DeepSeek-V2](https://arxiv.org/abs/2405.04434) | ✅ |
-| `qwen` | Alibaba | 2023–24 | [Qwen Technical Report](https://arxiv.org/abs/2309.16609) | 🔲 |
-| `gemma` | Google DeepMind | 2024 | [Gemma](https://arxiv.org/abs/2403.08295) | 🔲 |
+| [`qwen`](qwen/) | Alibaba | 2023–24 | [Qwen Technical Report](https://arxiv.org/abs/2309.16609) | ✅ |
+| [`gemma`](gemma/) | Google DeepMind | 2024 | [Gemma](https://arxiv.org/abs/2403.08295), [Gemma 2](https://arxiv.org/abs/2408.00118) | ✅ |
 
 ## 7. Inference-Time Serving
 
 | Topic | Lab | Year | Paper | Status |
 |---|---|---|---|---|
 | [`kv-caching-and-paged-attention`](kv-caching-and-paged-attention/) | - / UC Berkeley (vLLM) | - / 2023 | [PagedAttention / vLLM](https://arxiv.org/abs/2309.06180) | ✅ |
-| `speculative-decoding` | Google / DeepMind | 2023 | [Leviathan et al.](https://arxiv.org/abs/2211.17192), [Chen et al.](https://arxiv.org/abs/2302.01318) | 🔲 |
-| `quantization-for-inference` (GPTQ/AWQ/INT4) | - | 2022–23 | [GPTQ](https://arxiv.org/abs/2210.17323), [AWQ](https://arxiv.org/abs/2306.00978) | 🔲 |
+| [`speculative-decoding`](speculative-decoding/) | Google / DeepMind | 2023 | [Leviathan et al.](https://arxiv.org/abs/2211.17192), [Chen et al.](https://arxiv.org/abs/2302.01318) | ✅ |
+| [`quantization-for-inference`](quantization-for-inference/) (GPTQ/AWQ/INT4) | IST Austria / MIT | 2022–23 | [GPTQ](https://arxiv.org/abs/2210.17323), [AWQ](https://arxiv.org/abs/2306.00978) | ✅ |
 
 ---
 
