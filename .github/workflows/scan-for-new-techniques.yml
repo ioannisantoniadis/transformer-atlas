@@ -1,0 +1,68 @@
+name: Scan for new architecture techniques
+
+on:
+  schedule:
+    - cron: "0 9 1 * *" # 09:00 UTC on the 1st of each month
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+
+            This repository (transformer-atlas) is a structured map of
+            decoder-only LLM architecture techniques. Read README.md for
+            the scope statement and MAP.md for the full list of what's
+            already covered (both tables and the two diagrams at the top).
+
+            Task: find genuinely new or newly-mainstream transformer
+            architecture techniques from major AI labs (Google/DeepMind,
+            OpenAI, Meta, Mistral AI, DeepSeek, NVIDIA, Anthropic, Alibaba,
+            and similar) that are NOT already in MAP.md, published or
+            having clearly crossed into mainstream/widely-cited adoption
+            in roughly the last 35 days.
+
+            Stay inside this repo's stated scope: decoder-only LLM
+            architecture and inference-serving techniques only. Skip
+            encoder-only/encoder-decoder models, vision/multimodal work,
+            training/alignment methods (RLHF, DPO, etc), benchmarks, and
+            minor version bumps -- README.md documents this boundary,
+            follow it exactly.
+
+            Bar for flagging something: it must be a genuinely new
+            architectural technique, or an existing one that has clearly
+            become mainstream/widely cited -- not routine research noise.
+            If nothing meets that bar, do nothing and exit; do not open a
+            placeholder or empty issue.
+
+            Before opening anything, run `gh issue list --label candidate-technique --state all`
+            to see what's already been flagged, so you don't propose the
+            same technique twice across runs.
+
+            For each qualifying candidate (cap at 5 per run), open one
+            GitHub issue via `gh issue create` with:
+              - Title: "New technique: <name> (<lab>, <year>)"
+              - Body: what it is, why it's a candidate, links to the
+                paper(s), and which MAP.md section it would likely belong
+                in (Positional Encoding / Attention / MoE / Full
+                Architectures / Inference Serving / etc).
+              - Label: "candidate-technique" (create the label first with
+                `gh label create candidate-technique --color 0e8a16 --description "Possible new addition to MAP.md" || true`
+                if it doesn't already exist).
+
+            Do not modify any files in the repository, do not commit
+            anything, and do not open pull requests -- this run is
+            read-only against the repo itself, its only output is issues.
+          claude_args: |
+            --allowedTools "Read,Glob,WebSearch,Bash(gh issue list:*),Bash(gh issue create:*),Bash(gh label create:*),Bash(gh label list:*)"
