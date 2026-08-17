@@ -5,13 +5,12 @@ on:
     - cron: "0 9 1 * *" # 09:00 UTC on the 1st of each month
   workflow_dispatch: {} # allow manual runs from the Actions tab
 
-permissions:
-  contents: read
-  issues: write
-
 jobs:
   scan:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - uses: actions/checkout@v4
 
@@ -75,3 +74,139 @@ jobs:
             read-only against the repo itself, its only output is issues.
           claude_args: |
             --allowedTools "Read,Glob,Grep,TodoWrite,WebSearch,WebFetch,Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue create:*),Bash(gh label create:*),Bash(gh label list:*)"
+
+  promote:
+    needs: scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
+          prompt: |
+            REPO: ${{ github.repository }}
+
+            This repository (transformer-atlas) is a structured map of
+            decoder-only LLM architecture techniques. Read README.md
+            (scope, structure) and MAP.md (current coverage, both tables
+            and the two Mermaid diagrams at the top) before doing
+            anything else.
+
+            Task: decide which open `candidate-technique` issues are
+            ready to actually be added to the repo, and add them via PR.
+            Nothing gets written straight to main -- every addition is a
+            PR the maintainer reviews and merges.
+
+            Run `gh issue list --label candidate-technique --state open --json number,title,createdAt,body`
+            to get the current candidates.
+
+            For each one, apply this rubric exactly:
+
+            GATE 1 -- dwell time. The issue must have been open at least
+            21 days (compare createdAt to today), UNLESS Gate 2's
+            "production deployment" criterion is confirmed right now --
+            shipped-and-usable beats a 21-day wait.
+
+            GATE 2 -- evidence, re-verified fresh right now via WebSearch
+            + WebFetch. Do NOT just trust the issue body -- search again.
+            At least 2 of these 4 must be independently confirmable with
+            a source you can cite:
+              A. Independent corroboration: discussed by someone other
+                 than the originating lab (another paper citing it, a
+                 substantive third-party technical writeup -- not social
+                 media buzz).
+              B. Cross-lab adoption: used or replicated by a team/model
+                 different from whoever introduced it.
+              C. Production deployment: actually shipping in a model
+                 people can use today, not just an ablation table.
+              D. Structural novelty: re-read MAP.md as it exists RIGHT
+                 NOW (it may have grown since the issue was opened) --
+                 is this still a genuinely new mechanism, not already
+                 covered by an existing row?
+
+            An issue that fails Gate 1, or clears Gate 1 but has fewer
+            than 2 of the 4 Gate-2 criteria: leave it open. Post one
+            short `gh issue comment` stating which criteria are currently
+            met/unmet, so the maintainer can see progress without
+            re-researching. If an issue has been open more than ~180
+            days and still doesn't clear Gate 2, close it with
+            `gh issue close` and a comment explaining it didn't
+            accumulate enough independent evidence.
+
+            An issue that clears both gates is eligible for promotion.
+            Promote at most 2 per run -- if more than 2 clear the bar,
+            take the oldest by createdAt and leave a comment on the rest
+            noting they qualified but were deferred to next run.
+
+            Before starting work on an eligible issue, run
+            `gh pr list --search "<issue number> in:body" --state all`
+            to make sure a previous run didn't already open a PR for it.
+
+            For each issue you promote:
+
+            1. `git checkout -b add-<topic-slug>` from main (branch name:
+               a short kebab-case slug of the technique).
+            2. `git config user.name "github-actions[bot]"` and
+               `git config user.email "41898282+github-actions[bot]@users.noreply.github.com"`.
+            3. Create the new topic folder following TEMPLATE.md exactly
+               -- read 2-3 existing folders (e.g. flash-attention/,
+               linear-attention/) as the quality/format bar:
+                 - README.md: Lab/Year/Paper header line, then The
+                   problem / The idea / How it's actually used /
+                   Tradeoffs / References, in this repo's existing prose
+                   style -- plain-language intuition, not just a
+                   restatement of the abstract.
+                 - implementation.py: minimal, dependency-light PyTorch,
+                   written to be read. Must include a `__main__` block
+                   that runs a small demo/sanity-check proving the core
+                   claim (numerically, the way this repo's other 23
+                   implementations do -- see linear-attention/implementation.py
+                   or speculative-decoding/implementation.py for the
+                   pattern). If you cannot write a correct, genuinely
+                   demonstrative implementation from public information,
+                   do NOT fabricate one -- abandon the promotion, comment
+                   on the issue explaining what's blocking it (e.g. no
+                   implementation detail public yet), and move to the
+                   next candidate instead.
+            4. Run `python3 <topic-folder>/implementation.py` yourself
+               and confirm it exits cleanly with no traceback. If it
+               errors and you can't fix it, do not open a PR -- comment
+               on the issue explaining the attempt failed and needs
+               manual follow-up, and move on.
+            5. Update MAP.md: add a row to the correct section's table,
+               AND add the technique to both Mermaid diagrams -- a node
+               in the right pipeline-stage subgraph (plus its id added
+               to that stage's `class ... <category>` line so it's
+               colored correctly) and a node in the right year's
+               subgraph in the timeline diagram.
+            6. Update docs/visual-map.html: add one object to the
+               `ITEMS` array in the same shape as the existing entries
+               (id matching the folder name, name, lab, year, yearLabel,
+               cat matching one of the existing category ids, paper URL).
+            7. `git add`, `git commit` (message: what was added and
+               why, referencing the issue), `git push -u origin
+               add-<topic-slug>`.
+            8. `gh pr create` with a body that states exactly which
+               Gate-2 criteria were met and the fresh evidence/links
+               found for each, and ends with `Closes #<issue-number>`.
+
+            Do not touch `main` directly at any point -- checkout,
+            commit, and push only ever happen on the new branch. Do not
+            rebase, force-push, or amend.
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,TodoWrite,Edit,Write,WebSearch,WebFetch,Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh issue close:*),Bash(gh pr list:*),Bash(gh pr create:*),Bash(git checkout:*),Bash(git config:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(python3:*)"
