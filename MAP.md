@@ -17,7 +17,7 @@ full scope rationale.
 ## Visual map
 
 The tables below are the source of truth; these two diagrams are the same
-23 topics read two other ways. There's also an
+26 topics read two other ways. There's also an
 [interactive version](https://johnantonn.github.io/transformer-atlas/visual-map.html)
 of both, with click-through to each folder and paper.
 
@@ -61,6 +61,7 @@ flowchart TD
         ring["Ring Attention<br/>2023"]
         longformer["Longformer / Sparse<br/>2019-20"]
         csahca["CSA / HCA<br/>2026"]
+        kda["Gated DeltaNet + KDA<br/>2024-25"]
     end
 
     subgraph S5["5 . Feedforward to sparse routing"]
@@ -86,7 +87,7 @@ flowchart TD
     class transformer,gpt foundations
     class rope,alibi,yarn positional
     class rmsnorm,mhc normffn
-    class mqagqa,flash,swa,linattn,mla,star,ring,longformer,csahca attention
+    class mqagqa,flash,swa,linattn,mla,star,ring,longformer,csahca,kda attention
     class moe moe
     class llama,mixtral,deepseekv2,qwen,gemma composed
     class kvcache,specdec,quant serving
@@ -145,10 +146,12 @@ flowchart LR
         star2["Star Attention<br/>NVIDIA"]
         gemma2["Gemma<br/>Google DeepMind"]
         deepseekmoe2["DeepSeekMoE<br/>DeepSeek AI"]
+        deltanet2["DeltaNet + Gated DeltaNet<br/>MIT / NVIDIA"]
     end
     subgraph Y2025["2025"]
         direction TB
         mhc2["mHC<br/>DeepSeek AI"]
+        kda2["KDA<br/>Moonshot AI/Kimi"]
     end
     subgraph Y2026["2026"]
         direction TB
@@ -193,6 +196,7 @@ flowchart LR
 | [`ring-attention`](ring-attention/) | UC Berkeley | 2023 | [Ring Attention](https://arxiv.org/abs/2310.01889) | ✅ |
 | [`longformer-and-sparse-attention`](longformer-and-sparse-attention/) | AI2 / OpenAI | 2020 / 2019 | [Longformer](https://arxiv.org/abs/2004.05150), [Sparse Transformer](https://arxiv.org/abs/1904.10509) | ✅ |
 | [`compressed-sparse-attention`](compressed-sparse-attention/) (CSA/HCA) | DeepSeek AI | 2026 | [DeepSeek-V4](https://arxiv.org/abs/2606.19348) | ✅ |
+| [`gated-deltanet-and-kda`](gated-deltanet-and-kda/) (DeltaNet → Gated DeltaNet → KDA) | MIT / NVIDIA / Moonshot AI | 2024–25 | [DeltaNet](https://arxiv.org/abs/2406.06484), [Gated DeltaNet](https://arxiv.org/abs/2412.06464), [KDA](https://arxiv.org/abs/2510.26692) | ✅ |
 
 ## 5. Mixture of Experts
 
