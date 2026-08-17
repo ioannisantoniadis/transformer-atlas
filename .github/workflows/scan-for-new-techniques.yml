@@ -6,7 +6,7 @@ on:
   workflow_dispatch: {} # allow manual runs from the Actions tab
 
 jobs:
-  scan:
+  discover:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,8 +27,6 @@ jobs:
             the scope statement and MAP.md for the full list of what's
             already covered (both tables and the two diagrams at the top).
 
-            ## Part 1 -- find new candidates
-
             Find genuinely new or newly-mainstream transformer
             architecture techniques from major AI labs (Google/DeepMind,
             OpenAI, Meta, Mistral AI, DeepSeek, NVIDIA, Anthropic, Alibaba,
@@ -46,8 +44,8 @@ jobs:
             Bar for flagging something: it must be a genuinely new
             architectural technique, or an existing one that has clearly
             become mainstream/widely cited -- not routine research noise.
-            If nothing meets that bar, skip straight to Part 2; do not
-            open a placeholder or empty issue.
+            If nothing meets that bar, do nothing and exit; do not open a
+            placeholder or empty issue.
 
             Verification: a WebSearch snippet is a lead, not a citation.
             For every candidate, use WebFetch to open the actual paper
@@ -60,8 +58,8 @@ jobs:
             first, so you don't propose the same technique twice across
             runs.
 
-            For each qualifying candidate (cap at 5 new issues per run),
-            open one GitHub issue via `gh issue create` with:
+            For each qualifying candidate (cap at 5 per run), open one
+            GitHub issue via `gh issue create` with:
               - Title: "New technique: <name> (<lab>, <year>)"
               - Body: what it is, why it's a candidate, links to the
                 paper(s), and which MAP.md section it would likely belong
@@ -71,13 +69,38 @@ jobs:
                 `gh label create candidate-technique --color 0e8a16 --description "Possible new addition to MAP.md" || true`
                 if it doesn't already exist).
 
-            ## Part 2 -- assess every open candidate
+            Do not modify any files in the repository, do not commit
+            anything, and do not open pull requests -- this run only
+            ever writes issues.
+          claude_args: |
+            --allowedTools "Read,Glob,Grep,TodoWrite,WebSearch,WebFetch,Bash(gh issue list:*),Bash(gh issue create:*),Bash(gh label create:*),Bash(gh label list:*)"
+            --max-turns 40
 
-            Run this for EVERY issue currently labeled
-            `candidate-technique` and open -- the ones you just opened in
-            Part 1, plus any that already existed. This is the objective,
-            evidence-based grade the maintainer reads instead of trusting
-            either of our judgment calls.
+  assess:
+    needs: discover
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          show_full_output: true
+          prompt: |
+            REPO: ${{ github.repository }}
+
+            This repository (transformer-atlas) is a structured map of
+            decoder-only LLM architecture techniques. Read MAP.md for
+            current coverage.
+
+            Task: grade a batch of open `candidate-technique` issues with
+            an objective, evidence-based assessment -- the thing the
+            maintainer reads instead of trusting either of our judgment
+            calls.
 
             Bash rule: every command you run must be a plain literal
             string -- no command substitution (`$(...)` or backticks)
@@ -87,7 +110,22 @@ jobs:
             reasoning, and only ever pass fixed literal values into
             commands.
 
-            For each such issue:
+            ## Pick this run's batch (cap: 4 issues)
+
+            Run `gh issue list --label candidate-technique --state open --json number,title,createdAt`
+            to see all open candidates. For each, check
+            `gh issue view <n> --json comments --jq '.comments[].body'`
+            for a comment starting with the exact line
+            `### SOTA assessment` -- that's a prior assessment.
+
+            Select up to 4 issues to assess this run, in this priority
+            order: (1) issues with no SOTA-assessment comment yet -- never
+            assessed, most urgent; (2) then issues whose most recent
+            SOTA-assessment comment is oldest. Leave the rest for next
+            run -- this keeps each run's cost bounded no matter how large
+            the candidate backlog grows. Assess ONLY the selected batch.
+
+            ## For each selected issue
 
             1. Paper age: determine the paper's first public date (arXiv
                submission date, or the lab's own announcement date if
@@ -130,21 +168,22 @@ jobs:
               - WATCHING: none of the above (the default for a
                 freshly-opened issue with no independent pickup yet).
 
-            Post a comment on the issue -- every run, even if the grade
-            is unchanged from last time, so the assessment's evolution
-            over time stays visible in the thread -- starting with the
-            exact line `### SOTA assessment`, followed by: the paper's
-            first-public date and age in days, citation count (with a
-            link to its Semantic Scholar page, or "not yet indexed"),
-            the specific adoption instances found (with links), the
-            specific discussions found (with links), production status,
-            and the resulting grade with a one-line justification.
+            Post a comment on the issue -- every time it's assessed, even
+            if the grade is unchanged from last time, so the assessment's
+            evolution over time stays visible in the thread -- starting
+            with the exact line `### SOTA assessment`, followed by: the
+            paper's first-public date and age in days, citation count
+            (with a link to its Semantic Scholar page, or "not yet
+            indexed"), the specific adoption instances found (with
+            links), the specific discussions found (with links),
+            production status, and the resulting grade with a one-line
+            justification.
 
             Then sync the issue's grade label to match, in one literal
             command that removes all four possible grade labels and adds
             back only the correct one (removing a label the issue
-            doesn't have is a harmless no-op, so there's no need to
-            check which one is currently set first):
+            doesn't have is a harmless no-op, so there's no need to check
+            which one is currently set first):
 
               gh issue edit <n> --remove-label grade:watching --remove-label grade:emerging --remove-label grade:notable --remove-label grade:breakthrough --add-label grade:<correct-one>
 
@@ -158,12 +197,13 @@ jobs:
 
             Do not modify any files in the repository, do not commit
             anything, and do not open pull requests -- this run only
-            ever writes issues, comments, and labels.
+            ever writes comments and labels.
           claude_args: |
-            --allowedTools "Read,Glob,Grep,TodoWrite,WebSearch,WebFetch,Bash(curl:*),Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue create:*),Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh label create:*),Bash(gh label list:*)"
+            --allowedTools "Read,Glob,Grep,TodoWrite,WebSearch,WebFetch,Bash(curl:*),Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh issue close:*),Bash(gh label create:*),Bash(gh label list:*)"
+            --max-turns 60
 
   promote:
-    needs: scan
+    needs: assess
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -203,7 +243,7 @@ jobs:
             if needed), and only ever pass fixed literal values into
             commands.
 
-            Task: promote issues the scan job that just ran has already
+            Task: promote issues the assess job that just ran has already
             graded NOTABLE or BREAKTHROUGH, by opening a PR for each.
             Nothing gets written straight to main -- every addition is a
             PR the maintainer reviews and merges. Do not re-derive the
@@ -286,3 +326,4 @@ jobs:
             rebase, force-push, or amend.
           claude_args: |
             --allowedTools "Read,Glob,Grep,TodoWrite,Edit,Write,WebSearch,WebFetch,Bash(gh issue list:*),Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh issue close:*),Bash(gh pr list:*),Bash(gh pr create:*),Bash(git checkout:*),Bash(git config:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git status:*),Bash(git diff:*),Bash(python3:*)"
+            --max-turns 60
