@@ -63,4 +63,8 @@ What you give up. Nothing in this repo is free — say what it costs
 ## Updating the map
 
 After adding a folder, add its row to the relevant category table in
-[`MAP.md`](MAP.md) and flip its status to ✅.
+[`MAP.md`](MAP.md), and add it to the git-graph diagram (a `commit` on
+the `transformer` or `state-space` branch, or a `merge` if it's a
+Hybrid). If it's Transformer-family, also add it to
+`docs/visual-map.html`'s `ITEMS` array so it shows up in the interactive
+Pipeline/Timeline/Lineage views.

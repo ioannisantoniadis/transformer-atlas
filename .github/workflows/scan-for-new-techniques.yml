@@ -372,26 +372,20 @@ jobs:
                errors and you can't fix it, do not open a PR -- comment
                on the issue explaining the attempt failed and needs
                manual follow-up, and move on.
-            5. Update MAP.md:
+            5. Update MAP.md (no Status column -- every row here is
+               already fully built by definition, so there's nothing to
+               flip):
                  - Add a row to the correct section's table (read the
                    section headers -- Foundations: Transformer,
                    Foundations: State-Space Models, Sequence Mixing:
                    Attention Family, Hybrid Architectures, etc -- and
                    match the candidate's Family to the right one).
-                 - Add it to the git-graph diagram (the first diagram
-                   under "Visual map"): a `commit id:` on the
+                 - Add it to the git-graph diagram (the only diagram in
+                   this file, under "Visual map"): a `commit id:` on the
                    `transformer` or `state-space` branch, or a `merge`
-                   commit if it's a Hybrid.
-                 - If (and only if) it's Transformer-family: also add it
-                   to the pipeline flowchart (a node in the right stage
-                   subgraph, plus its id added to that stage's
-                   `class ... <category>` line) and to the timeline
-                   diagram (a node in the right year's subgraph). State-
-                   Space and Hybrid entries do NOT go in the pipeline
-                   diagram (it's Transformer-forward-pass-specific, see
-                   the note above that diagram) but DO still get added to
-                   the timeline diagram's year subgraphs.
-                 - Update the topic count in the "Visual map" intro line.
+                   commit if it's a Hybrid. Do not add a pipeline or
+                   timeline diagram here -- those live only in
+                   docs/visual-map.html now, not in MAP.md.
             6. Update docs/visual-map.html: add one object to the `ITEMS`
                array in the same shape as the existing entries (id
                matching the folder name, name, lab, year, yearLabel, cat
