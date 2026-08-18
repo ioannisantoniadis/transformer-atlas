@@ -108,7 +108,7 @@
   }
   h1 {
     font-family: var(--font-mono);
-    font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.3rem);
+    font-size: clamp(1.15rem, 0.85rem + 1.1vw, 1.7rem);
     letter-spacing: -0.01em;
     margin: 0 0 0.7rem;
     text-wrap: balance;
@@ -118,8 +118,39 @@
     max-width: 62ch;
     color: var(--ink-soft);
     font-size: 0.98rem;
+    margin: 0 0 0.6rem;
   }
   .lede a { color: var(--blueprint); }
+  .lede-footnote {
+    margin: 0.9rem 0 0;
+    font-size: 0.86rem;
+  }
+  .lede-modes {
+    margin: 0.7rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .lede-modes > div {
+    display: flex;
+    gap: 0.9rem;
+    align-items: baseline;
+  }
+  .lede-modes dt {
+    flex: none;
+    width: 5.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--c-attention);
+  }
+  .lede-modes dd {
+    margin: 0;
+    max-width: 56ch;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+  }
 
   nav.controls {
     display: flex;
@@ -426,10 +457,13 @@
   <header class="top">
     <p class="eyebrow">transformer-atlas / visual map</p>
     <h1>From "Attention Is All You Need" to today's serving stack</h1>
-    <p class="lede">Three ways to read the same 30 techniques: <strong>Lineage</strong> shows architecture
-      families as branches off one root, with hybrids as merge points. <strong>Timeline</strong> orders every
-      technique by publication year. <strong>Pipeline</strong> orders the Transformer branch by where it sits in a
-      decoder-only forward pass, from token input to production serving. Click any chip to open its folder in
+    <p class="lede">Three ways to read the same 30 techniques:</p>
+    <dl class="lede-modes">
+      <div><dt>Lineage</dt><dd>Architecture families as branches off one root, hybrids as merge points.</dd></div>
+      <div><dt>Pipeline</dt><dd>The Transformer branch, ordered by where each piece sits in a decoder-only forward pass — token input to production serving.</dd></div>
+      <div><dt>Timeline</dt><dd>Every technique, ordered by publication year.</dd></div>
+    </dl>
+    <p class="lede lede-footnote">Click any chip to open its folder in
       <a href="https://github.com/ioannisantoniadis/transformer-atlas" target="_blank" rel="noopener">transformer-atlas</a>;
       the small link opens the source paper.</p>
     <nav class="controls">
