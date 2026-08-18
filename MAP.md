@@ -42,13 +42,9 @@ gitGraph
     commit id: "MQA/GQA, MLA, MoE routing"
     checkout state-space
     commit id: "Mamba (2023)"
-    checkout transformer
-    branch hybrid
-    checkout state-space
     commit id: "Mamba-2, SSD (2024)"
-    checkout hybrid
-    merge transformer id: "Jamba: attention layers"
-    merge state-space id: "Jamba: Mamba layers"
+    branch hybrid
+    merge transformer id: "Jamba (2024)"
     checkout transformer
     commit id: "DeepSeek-V2, LLaMA, Mixtral"
     checkout state-space
