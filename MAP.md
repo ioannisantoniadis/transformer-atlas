@@ -59,7 +59,8 @@ gitGraph
 | Topic | Lab | Year | Paper |
 |---|---|---|---|
 | [`s4-and-structured-state-spaces`](s4-and-structured-state-spaces/) (S4) | Stanford | 2021 | [Efficiently Modeling Long Sequences with Structured State Spaces](https://arxiv.org/abs/2111.00396) |
-| [`mamba-and-mamba-2`](mamba-and-mamba-2/) | CMU / Princeton | 2023 / 2024 | [Mamba](https://arxiv.org/abs/2312.00752), [Mamba-2 (SSD)](https://arxiv.org/abs/2405.21060) |
+| [`mamba`](mamba/) | CMU / Princeton | 2023 | [Mamba](https://arxiv.org/abs/2312.00752) |
+| [`mamba-2`](mamba-2/) | Princeton / CMU | 2024 | [Mamba-2 (SSD)](https://arxiv.org/abs/2405.21060) |
 
 ## 3. Positional Encoding
 

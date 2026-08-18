@@ -67,15 +67,16 @@ flowchart LR
 ## How it's actually used
 
 S4 itself was rarely deployed as-is in production LLMs — its fixed
-(input-independent) dynamics are the thing [`mamba-and-mamba-2`](../mamba-and-mamba-2/)
+(input-independent) dynamics are the thing [`mamba`](../mamba/)
 identifies as the real limitation and fixes. S4's lasting contribution is
 structural: it's the paper that proved a state-space model could be
 simultaneously fast to train and fast to run, and the recurrence-vs-
 convolution duality it established is the same pattern
-[`gated-deltanet-and-kda`](../gated-deltanet-and-kda/) and Mamba-2's
-structured state-space duality both rediscover from the attention side —
-one computation, multiple algorithmic realizations, is the recurring idea
-this whole state-space branch of the map is built on.
+[`gated-deltanet-and-kda`](../gated-deltanet-and-kda/) and
+[`mamba-2`](../mamba-2/)'s structured state-space duality both
+rediscover from the attention side — one computation, multiple
+algorithmic realizations, is the recurring idea this whole state-space
+branch of the map is built on.
 
 ## Tradeoffs
 
@@ -90,4 +91,4 @@ precisely what selective SSMs give up to fix.
 ## References
 
 - [Efficiently Modeling Long Sequences with Structured State Spaces](https://arxiv.org/abs/2111.00396) (Gu, Goel, Ré, 2021)
-- [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](../mamba-and-mamba-2/) — this repo's entry on where S4's fixed dynamics get replaced with input-dependent ones
+- [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](../mamba/) — this repo's entry on where S4's fixed dynamics get replaced with input-dependent ones

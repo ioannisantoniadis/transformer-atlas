@@ -93,7 +93,7 @@ already sits on, not an escape from it.
 
 Worth stating plainly: this lineage's "Gated Delta Networks" paper is
 literally subtitled "Improving Mamba2 with Delta Rule" —
-[`mamba-and-mamba-2`](../mamba-and-mamba-2/) and this entry are two routes
+[`mamba-2`](../mamba-2/) and this entry are two routes
 converging on the same computation, one arriving from a state-space
 formulation, the other from a kernelized-attention formulation.
 

@@ -1,6 +1,6 @@
-# Mamba & Mamba-2 (Selective State Spaces)
+# Mamba (Selective State Spaces)
 
-**Lab:** Albert Gu (CMU), Tri Dao (Princeton) · **Year:** 2023 / 2024 · **Paper:** [Mamba](https://arxiv.org/abs/2312.00752), [Mamba-2: Transformers are SSMs](https://arxiv.org/abs/2405.21060)
+**Lab:** Albert Gu (CMU), Tri Dao (Princeton) · **Year:** 2023 · **Paper:** [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752)
 **Family:** State-Space
 
 ## The problem
@@ -24,8 +24,8 @@ what's already there, much closer to attention's content-dependent
 behavior:
 
 ```
-S4 (fixed):      Ā, B̄, C same for every t
-Mamba (selective): Δ_t, B_t, C_t = functions of x_t   -- input-dependent per step
+S4 (fixed):        Ā, B̄, C same for every t
+Mamba (selective):  Δ_t, B_t, C_t = functions of x_t   -- input-dependent per step
 ```
 
 The cost: input-dependent dynamics break S4's global-convolution trick
@@ -34,28 +34,10 @@ recovers training-time parallelism a different way — a hardware-aware
 **parallel scan** (a parallel-prefix-sum-style algorithm) that computes
 the selective recurrence in `O(log n)` parallel depth instead of `n`
 sequential steps, without ever materializing the full state history in
-slow memory.
-
-**Mamba-2**'s structured state-space duality (SSD) result goes further:
-if the state matrix is constrained to a **scalar times identity**
-(a special case of Mamba's per-channel diagonal `A`, less general but
-newly tractable), the recurrence becomes *exactly* a form of causal
-linear attention — a masked matrix multiply with a specific
-(1-semiseparable) triangular mask, not just an analogy:
-
-```
-scalar-A SSM recurrence  ≡  causal attention with a structured decay mask
-        (sequential)               (matmul -- runs on tensor cores)
-```
-
-Same computation, two algorithmic realizations — literally the same
-pattern as S4's recurrence/convolution duality, one level up, and the
-same phenomenon [`gated-deltanet-and-kda`](../gated-deltanet-and-kda/)
-arrives at from the opposite direction (starting from linear attention's
-kernel view, arriving at a state-space-shaped recurrence with the delta
-rule). This repo's implementation below proves the SSD equivalence
-directly: the sequential scalar-SSM recurrence and its equivalent masked
-matrix multiply produce the same output, exactly.
+slow memory. This scan-based algorithm was itself a real engineering
+contribution, not just the selectivity idea — [`mamba-2`](../mamba-2/)
+picks up from here, showing a further-constrained special case of this
+same selective recurrence can skip the scan entirely and run as a matmul.
 
 ## How it's actually used
 
@@ -66,9 +48,10 @@ shipped models — as one ingredient in a hybrid stack rather than the
 whole architecture; see [`jamba-and-hybrid-architectures`](../jamba-and-hybrid-architectures/)
 for how AI21 Labs interleaves it with a minority of attention layers to
 get most of attention's precise retrieval at a fraction of its memory
-cost. Mamba-2's SSD reformulation is what made the state-space branch
-fast enough on modern GPUs (tensor-core matmul throughput, not just
-sequential-scan throughput) to be a serious production option at all.
+cost. It's also the direct ancestor of two other lineages in this map:
+[`mamba-2`](../mamba-2/)'s structured state-space duality result, and --
+arrived at independently from the attention side -- the delta-rule
+lineage in [`gated-deltanet-and-kda`](../gated-deltanet-and-kda/).
 
 ## Tradeoffs
 
@@ -78,10 +61,11 @@ the same fundamental capacity ceiling every entry in this branch and in
 [`linear-attention`](../linear-attention/) shares. Precise recall of one
 specific fact from deep in a very long context is still attention's
 strength; Mamba's advantage is everything about long-range context being
-*cheap*, not about it being *exact*.
+*cheap*, not about it being *exact*. The selective scan also isn't free
+to implement well -- it needs a custom hardware-aware kernel, unlike S4's
+single fixed convolution.
 
 ## References
 
 - [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752) (Gu, Dao, 2023)
-- [Transformers are SSMs: Generalized Models and Efficient Algorithms Through Structured State Space Duality](https://arxiv.org/abs/2405.21060) (Dao, Gu, 2024) — Mamba-2, ICML 2024
-- [`gated-deltanet-and-kda`](../gated-deltanet-and-kda/) — the same convergence between linear attention and state-space recurrences, arrived at from the attention side
+- [`mamba-2`](../mamba-2/) — the structured state-space duality result built directly on this

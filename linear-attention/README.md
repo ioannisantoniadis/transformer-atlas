@@ -50,8 +50,8 @@ causal linear attention as a recurrence:
 ```
 
 This is exactly the shape that motivates the whole state-space branch of
-this map — see [`s4-and-structured-state-spaces`](../s4-and-structured-state-spaces/)
-and [`mamba-and-mamba-2`](../mamba-and-mamba-2/), whose recurrences take
+this map — see [`s4-and-structured-state-spaces`](../s4-and-structured-state-spaces/),
+[`mamba`](../mamba/), and [`mamba-2`](../mamba-2/), whose recurrences take
 the same O(n) shape from the opposite direction (a state-space
 formulation rather than a kernelized similarity function), and
 [`gated-deltanet-and-kda`](../gated-deltanet-and-kda/), which refines

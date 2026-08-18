@@ -32,7 +32,8 @@ jobs:
             This repository (transformer-atlas) is a structured map of
             decoder-only LLM architecture techniques. Read README.md for
             the scope statement and MAP.md for the full list of what's
-            already covered (both tables and the two diagrams at the top).
+            already covered (both the tables and the git-graph diagram
+            at the top).
 
             IMPORTANT CONTEXT ON SELECTIVITY: MAP.md currently holds
             roughly 30 entries covering the ENTIRE history of decoder-only
@@ -291,8 +292,8 @@ jobs:
 
             This repository (transformer-atlas) is a structured map of
             decoder-only LLM architecture techniques. Read README.md
-            (scope, structure) and MAP.md (current coverage, both tables
-            and the two Mermaid diagrams at the top) before doing
+            (scope, structure) and MAP.md (current coverage, both the
+            tables and the git-graph diagram at the top) before doing
             anything else.
 
             Bash rule: every command you run must be a plain literal
@@ -343,7 +344,7 @@ jobs:
                -- read 2-3 existing folders as the quality/format bar,
                matching the candidate's Family: flash-attention/ or
                linear-attention/ for Transformer, s4-and-structured-state-spaces/
-               or mamba-and-mamba-2/ for State-Space, jamba-and-hybrid-architectures/
+               or mamba/ or mamba-2/ for State-Space, jamba-and-hybrid-architectures/
                for Hybrid:
                  - README.md: Lab/Year/Paper header line, then a
                    **Family:** line (Transformer / State-Space / Hybrid /
@@ -353,14 +354,14 @@ jobs:
                    plain-language intuition, not just a restatement of
                    the abstract. Cross-link to the closest related
                    existing entries (e.g. a new state-space variant
-                   should reference mamba-and-mamba-2/; a new hybrid
+                   should reference mamba/ or mamba-2/; a new hybrid
                    should reference jamba-and-hybrid-architectures/).
                  - implementation.py: minimal, dependency-light PyTorch,
                    written to be read. Must include a `__main__` block
                    that runs a small demo/sanity-check proving the core
                    claim (numerically, the way this repo's other 30
                    implementations do -- see linear-attention/implementation.py
-                   or mamba-and-mamba-2/implementation.py for the
+                   or mamba-2/implementation.py for the
                    pattern). If you cannot write a correct, genuinely
                    demonstrative implementation from public information,
                    do NOT fabricate one -- abandon the promotion, comment

@@ -10,7 +10,7 @@ The two branches of this map make opposite trades. Attention
 addressable via a KV cache — precise, but [`kv-caching-and-paged-attention`](../kv-caching-and-paged-attention/)
 already covers why that cache is the dominant memory-bandwidth cost at
 long context: it grows linearly with sequence length, unavoidably.
-[`mamba-and-mamba-2`](../mamba-and-mamba-2/)'s state is fixed-size and
+[`mamba`](../mamba/)'s state is fixed-size and
 cheap regardless of context length, but it's a *compressed* summary — the
 same fixed-capacity ceiling every entry in the state-space branch shares,
 which shows up as *reduced precision* on tasks that need to recall one
