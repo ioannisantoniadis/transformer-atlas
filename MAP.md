@@ -20,7 +20,7 @@ full scope rationale.
 
 The tables below are the source of truth; these three diagrams are the
 same 30 topics read three other ways. There's also an
-[interactive version](https://johnantonn.github.io/transformer-atlas/visual-map.html)
+[interactive version](https://ioannisantoniadis.github.io/transformer-atlas/visual-map.html)
 of all three, with click-through to each folder and paper.
 
 **Which family a technique belongs to, and where the branches meet** —

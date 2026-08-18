@@ -16,7 +16,7 @@ changed, why, who did it, and how does it actually work?"**
   This is the map; the folders below are the territory. It opens with two
   diagrams — where each technique sits in a forward pass, and who shipped
   what when.
-- An [interactive version](https://johnantonn.github.io/transformer-atlas/visual-map.html)
+- An [interactive version](https://ioannisantoniadis.github.io/transformer-atlas/visual-map.html)
   of both diagrams is also available — clickable, filterable by category,
   linking straight out to each folder and paper.
 - Pick any topic folder. Each one is self-contained:
