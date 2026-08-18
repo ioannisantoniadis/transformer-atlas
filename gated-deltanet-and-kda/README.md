@@ -1,6 +1,7 @@
 # Gated DeltaNet & KDA (Delta-Rule Linear Attention)
 
 **Lab:** DeltaNet — Songlin Yang et al. (MIT / MIT-IBM Watson AI Lab); Gated DeltaNet — Songlin Yang, Jan Kautz, Ali Hatamizadeh (NVIDIA); KDA — Moonshot AI / Kimi · **Year:** 2024 / 2024 / 2025 · **Paper:** [DeltaNet](https://arxiv.org/abs/2406.06484), [Gated DeltaNet](https://arxiv.org/abs/2412.06464), [KDA](https://arxiv.org/abs/2510.26692)
+**Family:** Transformer
 
 ## The problem
 
@@ -89,6 +90,12 @@ complexity than a single scalar gate (Gated DeltaNet) for that finer
 control. None of this is free — it's a better point on the same
 efficiency/capacity curve [`linear-attention`](../linear-attention/)
 already sits on, not an escape from it.
+
+Worth stating plainly: this lineage's "Gated Delta Networks" paper is
+literally subtitled "Improving Mamba2 with Delta Rule" —
+[`mamba-and-mamba-2`](../mamba-and-mamba-2/) and this entry are two routes
+converging on the same computation, one arriving from a state-space
+formulation, the other from a kernelized-attention formulation.
 
 ## References
 

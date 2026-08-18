@@ -1,6 +1,7 @@
 # Compressed Sparse Attention + Heavily Compressed Attention (CSA/HCA)
 
 **Lab:** DeepSeek AI · **Year:** 2026 · **Paper:** [DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence](https://arxiv.org/abs/2606.19348)
+**Family:** Transformer
 
 ## The problem
 

@@ -1,6 +1,7 @@
 # Quantization for Inference (GPTQ / AWQ)
 
 **Lab:** GPTQ — IST Austria; AWQ — MIT / Song Han's lab · **Year:** 2022 / 2023 · **Paper:** [GPTQ](https://arxiv.org/abs/2210.17323), [AWQ](https://arxiv.org/abs/2306.00978)
+**Family:** Cross-cutting — applies to any backbone (Transformer, State-Space, or Hybrid).
 
 ## The problem
 

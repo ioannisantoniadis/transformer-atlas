@@ -1,6 +1,7 @@
 # Sliding Window Attention
 
 **Lab:** Mistral AI (popularized at LLM scale); the masking idea predates it (Longformer, AI2, 2020) · **Year:** 2023 · **Paper:** [Mistral 7B](https://arxiv.org/abs/2310.06825)
+**Family:** Transformer
 
 ## The problem
 

@@ -1,6 +1,7 @@
 # The Transformer
 
 **Lab:** Google Brain · **Year:** 2017 · **Paper:** [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
+**Family:** Transformer
 
 ## The problem
 

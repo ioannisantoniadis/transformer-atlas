@@ -1,6 +1,7 @@
 # Mixture of Experts (MoE)
 
 **Lab:** Google (sparse gating, Switch Transformer); DeepSeek AI (fine-grained/shared-expert variant) · **Year:** 2017 / 2021 / 2024 · **Paper:** [Shazeer et al.](https://arxiv.org/abs/1701.06538), [Switch Transformer](https://arxiv.org/abs/2101.03961), [DeepSeekMoE](https://arxiv.org/abs/2401.06066)
+**Family:** Cross-cutting — applies to any backbone (Transformer, State-Space, or Hybrid).
 
 ## The problem
 

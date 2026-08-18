@@ -35,16 +35,18 @@ jobs:
             already covered (both tables and the two diagrams at the top).
 
             IMPORTANT CONTEXT ON SELECTIVITY: MAP.md currently holds
-            roughly 25 entries covering the ENTIRE history of decoder-only
-            LLM architecture from 2017 to today -- it is a highly
-            selective retrospective, not a changelog. At that density,
-            most individual weeks should surface ZERO candidates. The
-            test for flagging something is not "was this used in a
-            popular recent model" -- it's "would this earn its own
-            dedicated entry in a ~25-30-item all-time map of the field,
-            the way RoPE, FlashAttention, or MoE routing did." Most
-            technique variants shipped in any given model release do not
-            clear that bar even if the model itself is a big deal.
+            roughly 30 entries covering the ENTIRE history of decoder-only
+            LLM architecture from 2017 to today, across every mainstream
+            sequence-mixing family (Transformer/attention, State-Space/
+            Mamba, and hybrids of the two) -- it is a highly selective
+            retrospective, not a changelog. At that density, most
+            individual weeks should surface ZERO candidates. The test for
+            flagging something is not "was this used in a popular recent
+            model" -- it's "would this earn its own dedicated entry in a
+            ~30-40-item all-time map of the field, the way RoPE,
+            FlashAttention, Mamba, or MoE routing did." Most technique
+            variants shipped in any given model release do not clear that
+            bar even if the model itself is a big deal.
 
             Find candidates that are NOT already in MAP.md and were
             published, or first clearly crossed into mainstream/
@@ -60,7 +62,10 @@ jobs:
             directly).
 
             Stay inside this repo's stated scope: decoder-only LLM
-            architecture and inference-serving techniques only. Skip
+            architecture and inference-serving techniques only, across
+            ANY sequence-mixing mechanism -- attention (Transformer),
+            state-space/recurrent (Mamba and similar), and hybrids of the
+            two are all equally in scope, not just attention. Skip
             encoder-only/encoder-decoder models, vision/multimodal work,
             training/alignment methods (RLHF, DPO, etc), benchmarks, and
             minor version bumps -- README.md documents this boundary,
@@ -92,9 +97,14 @@ jobs:
             GitHub issue via `gh issue create` with:
               - Title: "New technique: <name> (<lab>, <year>)"
               - Body: what it is, why it's a candidate, links to the
-                paper(s), and which MAP.md section it would likely belong
-                in (Positional Encoding / Attention / MoE / Full
-                Architectures / Inference Serving / etc).
+                paper(s), which Family it belongs to (Transformer /
+                State-Space / Hybrid / Cross-cutting -- see TEMPLATE.md),
+                and which MAP.md section it would likely belong in
+                (Foundations: Transformer / Foundations: State-Space
+                Models / Positional Encoding / Normalization & Feedforward
+                Blocks / Sequence Mixing: Attention Family / Mixture of
+                Experts / Full Model Architectures: Transformer / Hybrid
+                Architectures / Inference-Time Serving).
               - Label: "candidate-technique" (create the label first with
                 `gh label create candidate-technique --color 0e8a16 --description "Possible new addition to MAP.md" || true`
                 if it doesn't already exist).
@@ -330,19 +340,27 @@ jobs:
             2. `git config user.name "github-actions[bot]"` and
                `git config user.email "41898282+github-actions[bot]@users.noreply.github.com"`.
             3. Create the new topic folder following TEMPLATE.md exactly
-               -- read 2-3 existing folders (e.g. flash-attention/,
-               linear-attention/) as the quality/format bar:
-                 - README.md: Lab/Year/Paper header line, then The
-                   problem / The idea / How it's actually used /
-                   Tradeoffs / References, in this repo's existing prose
-                   style -- plain-language intuition, not just a
-                   restatement of the abstract.
+               -- read 2-3 existing folders as the quality/format bar,
+               matching the candidate's Family: flash-attention/ or
+               linear-attention/ for Transformer, s4-and-structured-state-spaces/
+               or mamba-and-mamba-2/ for State-Space, jamba-and-hybrid-architectures/
+               for Hybrid:
+                 - README.md: Lab/Year/Paper header line, then a
+                   **Family:** line (Transformer / State-Space / Hybrid /
+                   Cross-cutting -- per TEMPLATE.md), then The problem /
+                   The idea / How it's actually used / Tradeoffs /
+                   References, in this repo's existing prose style --
+                   plain-language intuition, not just a restatement of
+                   the abstract. Cross-link to the closest related
+                   existing entries (e.g. a new state-space variant
+                   should reference mamba-and-mamba-2/; a new hybrid
+                   should reference jamba-and-hybrid-architectures/).
                  - implementation.py: minimal, dependency-light PyTorch,
                    written to be read. Must include a `__main__` block
                    that runs a small demo/sanity-check proving the core
-                   claim (numerically, the way this repo's other 23
+                   claim (numerically, the way this repo's other 30
                    implementations do -- see linear-attention/implementation.py
-                   or speculative-decoding/implementation.py for the
+                   or mamba-and-mamba-2/implementation.py for the
                    pattern). If you cannot write a correct, genuinely
                    demonstrative implementation from public information,
                    do NOT fabricate one -- abandon the promotion, comment
@@ -354,16 +372,37 @@ jobs:
                errors and you can't fix it, do not open a PR -- comment
                on the issue explaining the attempt failed and needs
                manual follow-up, and move on.
-            5. Update MAP.md: add a row to the correct section's table,
-               AND add the technique to both Mermaid diagrams -- a node
-               in the right pipeline-stage subgraph (plus its id added
-               to that stage's `class ... <category>` line so it's
-               colored correctly) and a node in the right year's
-               subgraph in the timeline diagram.
-            6. Update docs/visual-map.html: add one object to the
-               `ITEMS` array in the same shape as the existing entries
-               (id matching the folder name, name, lab, year, yearLabel,
-               cat matching one of the existing category ids, paper URL).
+            5. Update MAP.md:
+                 - Add a row to the correct section's table (read the
+                   section headers -- Foundations: Transformer,
+                   Foundations: State-Space Models, Sequence Mixing:
+                   Attention Family, Hybrid Architectures, etc -- and
+                   match the candidate's Family to the right one).
+                 - Add it to the git-graph diagram (the first diagram
+                   under "Visual map"): a `commit id:` on the
+                   `transformer` or `state-space` branch, or a `merge`
+                   commit if it's a Hybrid.
+                 - If (and only if) it's Transformer-family: also add it
+                   to the pipeline flowchart (a node in the right stage
+                   subgraph, plus its id added to that stage's
+                   `class ... <category>` line) and to the timeline
+                   diagram (a node in the right year's subgraph). State-
+                   Space and Hybrid entries do NOT go in the pipeline
+                   diagram (it's Transformer-forward-pass-specific, see
+                   the note above that diagram) but DO still get added to
+                   the timeline diagram's year subgraphs.
+                 - Update the topic count in the "Visual map" intro line.
+            6. Update docs/visual-map.html: add one object to the `ITEMS`
+               array in the same shape as the existing entries (id
+               matching the folder name, name, lab, year, yearLabel, cat
+               -- use "statespace" or "hybrid" for those families, matching
+               `CATEGORIES` and `LANE_BY_CAT`, or an existing category id
+               for Transformer-family entries, paper URL). The Lineage
+               tab picks up new entries automatically from `ITEMS`; no
+               other changes needed there. If it's Transformer-family and
+               belongs in the Pipeline view, also add a `STAGES` entry if
+               it's a genuinely new pipeline stage (rare) -- almost always
+               it just needs the `ITEMS` object with an existing `cat`.
             7. `git add`, `git commit` (message: what was added and
                why, referencing the issue), `git push -u origin
                add-<topic-slug>`.

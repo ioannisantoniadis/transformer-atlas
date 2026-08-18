@@ -32,13 +32,17 @@ changed, why, who did it, and how does it actually work?"**
 ## Scope
 
 **In scope:** the decoder-only LLM lineage (the architecture family behind
-GPT, LLaMA, Mistral, DeepSeek, etc.) and the mainstream, widely-cited
-modifications made to it — attention variants (MQA/GQA, FlashAttention,
-sliding-window, linear attention, MLA, Star Attention, ...), positional
-encodings (RoPE, ALiBi), normalization/activation swaps (RMSNorm, SwiGLU),
-Mixture-of-Experts routing, and the inference-serving techniques (KV
-caching, PagedAttention, speculative decoding) that determine how these
-models are actually run.
+GPT, LLaMA, Mistral, DeepSeek, etc.), across every mainstream
+**sequence-mixing mechanism** — attention-family (MQA/GQA, FlashAttention,
+sliding-window, linear attention, MLA, Star Attention, ...), state-space/
+recurrent-family (S4, Mamba, Mamba-2), and the hybrids that combine them
+(Jamba and similar) — plus the mainstream, widely-cited modifications made
+to each: positional encodings (RoPE, ALiBi), normalization/activation
+swaps (RMSNorm, SwiGLU), Mixture-of-Experts routing, and the
+inference-serving techniques (KV caching, PagedAttention, speculative
+decoding) that determine how these models are actually run. Attention was
+never the only mechanism in scope, just the first one mapped — see
+`MAP.md`'s git-graph diagram for how the families relate.
 
 **Out of scope (for now):** encoder-only models (BERT-family), pure
 encoder-decoder models (T5/BART), vision/multimodal transformers, and

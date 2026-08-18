@@ -1,6 +1,7 @@
 # Qwen
 
 **Lab:** Alibaba · **Year:** 2023–2024 · **Paper:** [Qwen Technical Report](https://arxiv.org/abs/2309.16609), [Qwen2 Technical Report](https://arxiv.org/abs/2407.10671)
+**Family:** Transformer
 
 ## The problem
 

@@ -9,6 +9,11 @@ Each topic is a top-level folder: `kebab-case-name/README.md` +
 # Topic Name
 
 **Lab:** who introduced it · **Year:** YYYY · **Paper:** [Title](arxiv-link)
+**Family:** Transformer / State-Space / Hybrid — which sequence-mixing
+lineage this belongs to. Drives which branch it appears on in `MAP.md`'s
+git-graph diagram and the interactive Lineage view. A cross-cutting
+technique that applies regardless of backbone (MoE routing, KV caching,
+quantization) can state that explicitly instead of picking one.
 
 ## The problem
 

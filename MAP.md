@@ -7,8 +7,10 @@ PyTorch `implementation.py`.
 
 Status: ✅ written · 🔲 planned (in the map, not yet built — PRs/contributions welcome)
 
-Scope note: this map tracks the **decoder-only LLM lineage and the
-architectural/inference techniques that make it fast at scale**. It
+Scope note: this map tracks the **decoder-only LLM lineage across every
+mainstream sequence-mixing mechanism** — attention (Transformer),
+state-space/recurrent (Mamba), and the hybrids that combine them — and
+the architectural/inference techniques that make each fast at scale. It
 deliberately excludes encoder-only models (BERT), encoder-decoder models
 (T5), pure vision transformers, and training/alignment techniques (RLHF,
 DPO) that aren't architecture per se — see [README.md](README.md) for the
@@ -16,14 +18,50 @@ full scope rationale.
 
 ## Visual map
 
-The tables below are the source of truth; these two diagrams are the same
-27 topics read two other ways. There's also an
+The tables below are the source of truth; these three diagrams are the
+same 30 topics read three other ways. There's also an
 [interactive version](https://johnantonn.github.io/transformer-atlas/visual-map.html)
-of both, with click-through to each folder and paper.
+of all three, with click-through to each folder and paper.
 
-**Where each technique sits in a forward pass** — every row below modifies
-one stage of the same decoder-only block, in the order data actually flows
-through it:
+**Which family a technique belongs to, and where the branches meet** —
+architecture families as branches off a common root, hybrids as merge
+commits. This is the high-level orientation view; the tables further down
+have the complete list within each branch:
+
+```mermaid
+%%{init: {'gitGraph': {'mainBranchName': 'transformer'}}}%%
+gitGraph
+    commit id: "sequence modeling"
+    commit id: "Transformer (2017)"
+    branch state-space
+    checkout transformer
+    commit id: "GPT, RoPE, FlashAttention"
+    checkout state-space
+    commit id: "S4 (2021)"
+    checkout transformer
+    commit id: "MQA/GQA, MLA, MoE routing"
+    checkout state-space
+    commit id: "Mamba (2023)"
+    checkout transformer
+    branch hybrid
+    checkout state-space
+    commit id: "Mamba-2, SSD (2024)"
+    checkout hybrid
+    merge transformer id: "Jamba: attention layers"
+    merge state-space id: "Jamba: Mamba layers"
+    checkout transformer
+    commit id: "DeepSeek-V2, LLaMA, Mixtral"
+    checkout state-space
+    commit id: "Gated DeltaNet / KDA (2024-25)"
+```
+
+**Where each Transformer-branch technique sits in a forward pass** —
+every row below modifies one stage of the same decoder-only attention
+block, in the order data actually flows through it. (State-space and
+hybrid entries don't decompose into these same stages — a state-space
+layer has no separate "attention mechanism" step — so they're not shown
+here; see the git-graph above and the State-Space Models / Hybrid
+Architectures tables below for those.)
 
 ```mermaid
 flowchart TD
@@ -122,6 +160,7 @@ flowchart LR
         rope2["RoPE<br/>Zhuiyi"]
         alibi2["ALiBi<br/>UW/FAIR"]
         switch2["Switch Transformer<br/>Google"]
+        s42["S4<br/>Stanford"]
     end
     subgraph Y2022["2022"]
         direction TB
@@ -139,6 +178,7 @@ flowchart LR
         specdec2["Speculative Decoding<br/>Google/DeepMind"]
         awq2["AWQ<br/>MIT"]
         qwen2["Qwen<br/>Alibaba"]
+        mambav1["Mamba<br/>CMU/Princeton"]
     end
     subgraph Y2024["2024"]
         direction TB
@@ -148,6 +188,8 @@ flowchart LR
         gemma2["Gemma<br/>Google DeepMind"]
         deepseekmoe2["DeepSeekMoE<br/>DeepSeek AI"]
         deltanet2["DeltaNet + Gated DeltaNet<br/>MIT / NVIDIA"]
+        mambav2["Mamba-2 (SSD)<br/>Princeton/CMU"]
+        jamba2["Jamba<br/>AI21 Labs"]
     end
     subgraph Y2025["2025"]
         direction TB
@@ -163,14 +205,21 @@ flowchart LR
     Y2017 --> Y2019 --> Y2020 --> Y2021 --> Y2022 --> Y2023 --> Y2024 --> Y2025 --> Y2026
 ```
 
-## 1. Foundations
+## 1. Foundations: Transformer
 
 | Topic | Lab | Year | Paper | Status |
 |---|---|---|---|---|
 | [`transformer`](transformer/) | Google Brain | 2017 | [Attention Is All You Need](https://arxiv.org/abs/1706.03762) | ✅ |
 | [`gpt`](gpt/) (GPT-2 / GPT-3) | OpenAI | 2019 / 2020 | [GPT-2](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf), [GPT-3](https://arxiv.org/abs/2005.14165) | ✅ |
 
-## 2. Positional Encoding
+## 2. Foundations: State-Space Models
+
+| Topic | Lab | Year | Paper | Status |
+|---|---|---|---|---|
+| [`s4-and-structured-state-spaces`](s4-and-structured-state-spaces/) (S4) | Stanford | 2021 | [Efficiently Modeling Long Sequences with Structured State Spaces](https://arxiv.org/abs/2111.00396) | ✅ |
+| [`mamba-and-mamba-2`](mamba-and-mamba-2/) | CMU / Princeton | 2023 / 2024 | [Mamba](https://arxiv.org/abs/2312.00752), [Mamba-2 (SSD)](https://arxiv.org/abs/2405.21060) | ✅ |
+
+## 3. Positional Encoding
 
 | Topic | Lab | Year | Paper | Status |
 |---|---|---|---|---|
@@ -178,7 +227,7 @@ flowchart LR
 | [`alibi`](alibi/) | UW / FAIR | 2021 | [Train Short, Test Long](https://arxiv.org/abs/2108.12409) | ✅ |
 | [`yarn-and-rope-scaling`](yarn-and-rope-scaling/) | Meta / Nous Research et al. | 2023 | [Position Interpolation](https://arxiv.org/abs/2306.15595), [YaRN](https://arxiv.org/abs/2309.00071) | ✅ |
 
-## 3. Normalization & Feedforward Blocks
+## 4. Normalization & Feedforward Blocks
 
 | Topic | Lab | Year | Paper | Status |
 |---|---|---|---|---|
@@ -186,7 +235,12 @@ flowchart LR
 | [`manifold-constrained-hyper-connections`](manifold-constrained-hyper-connections/) (mHC) | DeepSeek AI | 2025 | [mHC](https://arxiv.org/abs/2512.24880) | ✅ |
 | [`attention-residuals`](attention-residuals/) (AttnRes) | Moonshot AI / Kimi | 2026 | [Attention Residuals](https://arxiv.org/abs/2603.15031) | ✅ |
 
-## 4. Attention Mechanisms & Efficiency Variants
+## 5. Sequence Mixing: Attention Family
+
+Attention was never the only sequence-mixing mechanism in scope, just the
+first one mapped — see [section 2](#2-foundations-state-space-models) for
+the state-space branch, whose entries are variants on the *same* problem
+(mix information across the sequence) solved a structurally different way.
 
 | Topic | Lab | Year | Paper | Status |
 |---|---|---|---|---|
@@ -201,13 +255,17 @@ flowchart LR
 | [`compressed-sparse-attention`](compressed-sparse-attention/) (CSA/HCA) | DeepSeek AI | 2026 | [DeepSeek-V4](https://arxiv.org/abs/2606.19348) | ✅ |
 | [`gated-deltanet-and-kda`](gated-deltanet-and-kda/) (DeltaNet → Gated DeltaNet → KDA) | MIT / NVIDIA / Moonshot AI | 2024–25 | [DeltaNet](https://arxiv.org/abs/2406.06484), [Gated DeltaNet](https://arxiv.org/abs/2412.06464), [KDA](https://arxiv.org/abs/2510.26692) | ✅ |
 
-## 5. Mixture of Experts
+## 6. Mixture of Experts
+
+Cross-cutting — MoE routing applies to the feedforward block regardless
+of which sequence-mixing mechanism the layer uses; see [`jamba-and-hybrid-architectures`](jamba-and-hybrid-architectures/)
+for a shipped model applying it across both.
 
 | Topic | Lab | Year | Paper | Status |
 |---|---|---|---|---|
 | [`mixture-of-experts`](mixture-of-experts/) (sparse gating → Switch → DeepSeekMoE) | Google / DeepSeek | 2017 / 2021 / 2024 | [Shazeer et al.](https://arxiv.org/abs/1701.06538), [Switch Transformer](https://arxiv.org/abs/2101.03961), [DeepSeekMoE](https://arxiv.org/abs/2401.06066) | ✅ |
 
-## 6. Full Model Architectures (composed systems)
+## 7. Full Model Architectures: Transformer (composed systems)
 
 | Topic | Lab | Year | Paper | Status |
 |---|---|---|---|---|
@@ -217,7 +275,20 @@ flowchart LR
 | [`qwen`](qwen/) | Alibaba | 2023–24 | [Qwen Technical Report](https://arxiv.org/abs/2309.16609) | ✅ |
 | [`gemma`](gemma/) | Google DeepMind | 2024 | [Gemma](https://arxiv.org/abs/2403.08295), [Gemma 2](https://arxiv.org/abs/2408.00118) | ✅ |
 
-## 7. Inference-Time Serving
+## 8. Hybrid Architectures
+
+The merge commits — models that interleave the Transformer and
+State-Space branches within one architecture, rather than choosing one.
+
+| Topic | Lab | Year | Paper | Status |
+|---|---|---|---|---|
+| [`jamba-and-hybrid-architectures`](jamba-and-hybrid-architectures/) | AI21 Labs | 2024 | [Jamba](https://arxiv.org/abs/2403.19887), [Jamba-1.5](https://arxiv.org/abs/2408.12570) | ✅ |
+
+## 9. Inference-Time Serving
+
+Cross-cutting — KV caching, quantization, and speculative decoding apply
+to a shipped model regardless of whether its backbone is attention,
+state-space, or hybrid.
 
 | Topic | Lab | Year | Paper | Status |
 |---|---|---|---|---|
@@ -238,3 +309,10 @@ flowchart LR
 - **🔲 rows** are real gaps, not filler — they're in the map so the
   landscape stays honest even where the writeup doesn't exist yet. See
   [TEMPLATE.md](TEMPLATE.md) to add one.
+- **Branches solve the same problem differently, not different problems.**
+  Sections 1-2 are two answers to "how do you mix information across a
+  sequence" (attention's any-to-any weighted lookup vs. a state-space
+  recurrence's fixed-size compressed summary) — everything downstream in
+  each branch is a refinement of its answer, and section 8 is what
+  happens when a model uses both answers in the same forward pass. Each
+  topic's `README.md` states its `Family` explicitly.

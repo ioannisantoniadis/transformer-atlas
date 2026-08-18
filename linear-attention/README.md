@@ -1,6 +1,7 @@
 # Linear Attention
 
 **Lab:** Idiap Research Institute / EPFL (Linear Transformers); Google (Performer) · **Year:** 2020 · **Paper:** [Transformers are RNNs](https://arxiv.org/abs/2006.16236), [Performer](https://arxiv.org/abs/2009.14794)
+**Family:** Transformer
 
 ## The problem
 
@@ -48,10 +49,14 @@ causal linear attention as a recurrence:
   out_i = φ(q_i) · S_i / normalizer_i
 ```
 
-This is exactly the shape that motivates a lot of recent "efficient
-sequence model" work (state-space models like Mamba, RWKV, etc. — outside
-this repo's decoder-only-Transformer scope, but the O(n) recurrent-state
-framing is the same idea).
+This is exactly the shape that motivates the whole state-space branch of
+this map — see [`s4-and-structured-state-spaces`](../s4-and-structured-state-spaces/)
+and [`mamba-and-mamba-2`](../mamba-and-mamba-2/), whose recurrences take
+the same O(n) shape from the opposite direction (a state-space
+formulation rather than a kernelized similarity function), and
+[`gated-deltanet-and-kda`](../gated-deltanet-and-kda/), which refines
+this exact recurrence with an erase-then-write delta rule instead of the
+pure accumulation shown above.
 
 `φ` needs to produce non-negative outputs (so the "attention weights"
 stay non-negative, like softmax's). Common choices: `elu(x) + 1`

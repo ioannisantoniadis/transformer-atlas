@@ -1,6 +1,7 @@
 # KV Caching and PagedAttention
 
 **Lab:** KV caching — folklore/no single paper; PagedAttention — UC Berkeley (vLLM) · **Year:** — / 2023 · **Paper:** [Efficient Memory Management for LLM Serving with PagedAttention](https://arxiv.org/abs/2309.06180)
+**Family:** Cross-cutting — applies to any backbone (Transformer, State-Space, or Hybrid).
 
 ## The problem
 

@@ -1,6 +1,7 @@
 # Attention Residuals (AttnRes)
 
 **Lab:** Kimi Team (Moonshot AI) · **Year:** 2026 · **Paper:** [Attention Residuals](https://arxiv.org/abs/2603.15031)
+**Family:** Transformer
 
 ## The problem
 

@@ -1,6 +1,7 @@
 # Mixtral
 
 **Lab:** Mistral AI · **Year:** 2024 · **Paper:** [Mixtral of Experts](https://arxiv.org/abs/2401.04088)
+**Family:** Transformer
 
 ## The problem
 

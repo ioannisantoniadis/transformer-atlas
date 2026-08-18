@@ -1,6 +1,7 @@
 # Rotary Position Embedding (RoPE)
 
 **Lab:** Zhuiyi Technology (adopted by EleutherAI's GPT-NeoX, then everyone) · **Year:** 2021 · **Paper:** [RoFormer](https://arxiv.org/abs/2104.09864)
+**Family:** Transformer
 
 ## The problem
 

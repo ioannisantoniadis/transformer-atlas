@@ -1,6 +1,7 @@
 # Speculative Decoding
 
 **Lab:** Google Research; DeepMind (concurrently) · **Year:** 2023 · **Paper:** [Leviathan et al.](https://arxiv.org/abs/2211.17192), [Chen et al.](https://arxiv.org/abs/2302.01318)
+**Family:** Cross-cutting — applies to any backbone (Transformer, State-Space, or Hybrid).
 
 ## The problem
 

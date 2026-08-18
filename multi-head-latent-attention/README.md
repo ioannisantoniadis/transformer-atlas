@@ -1,6 +1,7 @@
 # Multi-Head Latent Attention (MLA)
 
 **Lab:** DeepSeek AI · **Year:** 2024 · **Paper:** [DeepSeek-V2](https://arxiv.org/abs/2405.04434)
+**Family:** Transformer
 
 ## The problem
 

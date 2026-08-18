@@ -1,6 +1,7 @@
 # RMSNorm and SwiGLU
 
 **Lab:** RMSNorm — Edinburgh/Sussex (Zhang & Sennrich); SwiGLU — Google · **Year:** 2019 / 2020 · **Paper:** [RMSNorm](https://arxiv.org/abs/1910.07467), [GLU Variants Improve Transformer](https://arxiv.org/abs/2002.05202)
+**Family:** Transformer
 
 Two small, independent swaps that nearly every post-2022 open-weight model
 (LLaMA, Mistral, DeepSeek, Qwen, ...) makes to the original

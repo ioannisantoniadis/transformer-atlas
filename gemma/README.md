@@ -1,6 +1,7 @@
 # Gemma
 
 **Lab:** Google DeepMind · **Year:** 2024 · **Paper:** [Gemma: Open Models Based on Gemini Research and Technology](https://arxiv.org/abs/2403.08295), [Gemma 2](https://arxiv.org/abs/2408.00118)
+**Family:** Transformer
 
 ## The problem
 

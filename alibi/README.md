@@ -1,6 +1,7 @@
 # ALiBi (Attention with Linear Biases)
 
 **Lab:** University of Washington / Facebook AI Research (Press, Smith, Lewis) · **Year:** 2021 · **Paper:** [Train Short, Test Long](https://arxiv.org/abs/2108.12409)
+**Family:** Transformer
 
 ## The problem
 

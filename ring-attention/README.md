@@ -1,6 +1,7 @@
 # Ring Attention
 
 **Lab:** UC Berkeley (Liu, Zaharia, Abbeel) · **Year:** 2023 · **Paper:** [Ring Attention with Blockwise Transformers for Near-Infinite Context](https://arxiv.org/abs/2310.01889)
+**Family:** Transformer
 
 ## The problem
 

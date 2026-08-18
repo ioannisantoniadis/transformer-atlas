@@ -1,6 +1,7 @@
 # YaRN and RoPE Scaling
 
 **Lab:** Position Interpolation — Meta AI; NTK-aware scaling — community (u/bloc97 et al., unpublished blog origins); YaRN — Nous Research / EleutherAI / others · **Year:** 2023 · **Paper:** [Position Interpolation](https://arxiv.org/abs/2306.15595), [YaRN](https://arxiv.org/abs/2309.00071)
+**Family:** Transformer
 
 ## The problem
 

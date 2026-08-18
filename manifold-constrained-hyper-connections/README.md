@@ -1,6 +1,7 @@
 # Manifold-Constrained Hyper-Connections (mHC)
 
 **Lab:** DeepSeek AI · **Year:** 2025 · **Paper:** [mHC: Manifold-Constrained Hyper-Connections](https://arxiv.org/abs/2512.24880)
+**Family:** Transformer
 
 ## The problem
 

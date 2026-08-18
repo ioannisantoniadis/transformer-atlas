@@ -1,6 +1,7 @@
 # Longformer and Sparse Attention Patterns
 
 **Lab:** Allen Institute for AI (Longformer); OpenAI (Sparse Transformer, earlier) · **Year:** 2020 / 2019 · **Paper:** [Longformer](https://arxiv.org/abs/2004.05150), [Generating Long Sequences with Sparse Transformers](https://arxiv.org/abs/1904.10509)
+**Family:** Transformer
 
 ## The problem
 

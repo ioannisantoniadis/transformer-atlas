@@ -22,6 +22,8 @@
     --c-moe: #a6433f;
     --c-composed: #4f7a3f;
     --c-serving: #a67c1e;
+    --c-statespace: #2e6b8f;
+    --c-hybrid: #6b6558;
 
     --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -45,6 +47,8 @@
       --c-moe: #d4726c;
       --c-composed: #82b96e;
       --c-serving: #d1a53d;
+      --c-statespace: #6fa8c9;
+      --c-hybrid: #ada590;
     }
   }
   :root[data-theme="dark"] {
@@ -64,6 +68,8 @@
     --c-moe: #d4726c;
     --c-composed: #82b96e;
     --c-serving: #d1a53d;
+    --c-statespace: #6fa8c9;
+    --c-hybrid: #ada590;
   }
 
   * { box-sizing: border-box; }
@@ -335,6 +341,74 @@
     margin-top: 0.2rem;
   }
 
+  /* Lineage */
+  .lineage {
+    margin-top: 2.5rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+  .lineage-canvas { position: relative; }
+  .lineage-lane-label {
+    position: absolute;
+    left: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    background: var(--paper);
+    padding-right: 0.5rem;
+  }
+  .lineage-root {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    background: var(--paper);
+    padding-right: 0.5rem;
+  }
+  .lineage-chip {
+    --chip-color: var(--blueprint);
+    position: absolute;
+    width: 9.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--chip-color);
+    border-radius: 3px;
+    padding: 0.3rem 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  }
+  .lineage-chip:hover, .lineage-chip:focus-visible {
+    transform: translateY(-2px);
+    border-color: var(--chip-color);
+    box-shadow: 0 4px 10px -4px rgba(0,0,0,0.35);
+    z-index: 2;
+  }
+  .lineage-chip[data-dim="true"] { opacity: 0.25; pointer-events: none; }
+  .lineage-chip-name {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lineage-chip-year {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--ink-faint);
+    flex: none;
+  }
+
   footer.foot {
     margin-top: 3.5rem;
     padding-top: 1.25rem;
@@ -352,21 +426,24 @@
   <header class="top">
     <p class="eyebrow">transformer-atlas / visual map</p>
     <h1>From "Attention Is All You Need" to today's serving stack</h1>
-    <p class="lede">Two ways to read the same 23 techniques: <strong>Timeline</strong> orders them by publication
-      year, so you can see who shipped what and when. <strong>Pipeline</strong> orders them by where they sit in a
+    <p class="lede">Three ways to read the same 30 techniques: <strong>Lineage</strong> shows architecture
+      families as branches off one root, with hybrids as merge points. <strong>Timeline</strong> orders every
+      technique by publication year. <strong>Pipeline</strong> orders the Transformer branch by where it sits in a
       decoder-only forward pass, from token input to production serving. Click any chip to open its folder in
       <a href="https://github.com/johnantonn/transformer-atlas" target="_blank" rel="noopener">transformer-atlas</a>;
       the small link opens the source paper.</p>
     <nav class="controls">
       <div class="tabs" role="tablist" aria-label="View">
-        <button type="button" data-view="pipeline" aria-pressed="true">Pipeline</button>
+        <button type="button" data-view="lineage" aria-pressed="true">Lineage</button>
+        <button type="button" data-view="pipeline" aria-pressed="false">Pipeline</button>
         <button type="button" data-view="timeline" aria-pressed="false">Timeline</button>
       </div>
       <div class="legend" id="legend"></div>
     </nav>
   </header>
 
-  <section class="view active" id="view-pipeline"></section>
+  <section class="view active" id="view-lineage"></section>
+  <section class="view" id="view-pipeline"></section>
   <section class="view" id="view-timeline"></section>
 
   <footer class="foot">
@@ -379,11 +456,13 @@
 
   const CATEGORIES = [
     { id: "foundations", label: "Foundations",              color: "var(--c-foundations)" },
+    { id: "statespace",  label: "State-Space Models",       color: "var(--c-statespace)"  },
     { id: "positional",  label: "Positional Encoding",       color: "var(--c-positional)"  },
     { id: "normffn",     label: "Normalization & FFN",       color: "var(--c-normffn)"     },
     { id: "attention",   label: "Attention & Efficiency",    color: "var(--c-attention)"   },
     { id: "moe",         label: "Mixture of Experts",        color: "var(--c-moe)"         },
     { id: "composed",    label: "Full Architectures",        color: "var(--c-composed)"    },
+    { id: "hybrid",      label: "Hybrid Architectures",      color: "var(--c-hybrid)"      },
     { id: "serving",     label: "Inference Serving",         color: "var(--c-serving)"     },
   ];
 
@@ -409,6 +488,11 @@
       paper: "https://arxiv.org/abs/1706.03762" },
     { id: "gpt", name: "GPT-2 / GPT-3", lab: "OpenAI", year: 2019, yearLabel: "2019–20", cat: "foundations",
       paper: "https://arxiv.org/abs/2005.14165" },
+
+    { id: "s4-and-structured-state-spaces", name: "S4", lab: "Stanford", year: 2021, yearLabel: "2021", cat: "statespace",
+      paper: "https://arxiv.org/abs/2111.00396" },
+    { id: "mamba-and-mamba-2", name: "Mamba & Mamba-2", lab: "CMU / Princeton", year: 2023, yearLabel: "2023–24", cat: "statespace",
+      paper: "https://arxiv.org/abs/2312.00752" },
 
     { id: "rotary-position-embedding", name: "RoPE", lab: "Zhuiyi / EleutherAI", year: 2021, yearLabel: "2021", cat: "positional",
       paper: "https://arxiv.org/abs/2104.09864" },
@@ -465,6 +549,9 @@
       paper: "https://arxiv.org/abs/2211.17192" },
     { id: "quantization-for-inference", name: "Quantization (GPTQ / AWQ)", lab: "IST Austria / MIT", year: 2022, yearLabel: "2022–23", cat: "serving",
       paper: "https://arxiv.org/abs/2210.17323" },
+
+    { id: "jamba-and-hybrid-architectures", name: "Jamba", lab: "AI21 Labs", year: 2024, yearLabel: "2024", cat: "hybrid",
+      paper: "https://arxiv.org/abs/2403.19887" },
   ];
 
   const catColor = id => `var(--c-${id})`;
@@ -510,7 +597,7 @@
     document.querySelectorAll(".legend button").forEach(b => {
       b.dataset.dim = activeFilter && b.dataset.cat !== activeFilter ? "true" : "false";
     });
-    document.querySelectorAll(".chip").forEach(c => {
+    document.querySelectorAll(".chip, .lineage-chip").forEach(c => {
       c.dataset.dim = activeFilter && c.dataset.cat !== activeFilter ? "true" : "false";
     });
   }
@@ -565,6 +652,147 @@
     el.appendChild(tl);
   }
 
+  const LANE_BY_CAT = { statespace: "state-space", hybrid: "hybrid" };
+  const laneOf = item => LANE_BY_CAT[item.cat] || "transformer";
+
+  function lineageChip(item) {
+    const a = document.createElement("a");
+    a.className = "lineage-chip";
+    a.href = REPO + item.id + "/";
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.dataset.cat = item.cat;
+    a.style.setProperty("--chip-color", catColor(item.cat));
+    a.innerHTML = `
+      <span class="lineage-chip-name">${item.name}</span>
+      <span class="lineage-chip-year">${item.year}</span>
+    `;
+    a.title = `${item.name} — ${item.lab}, ${item.yearLabel}`;
+    return a;
+  }
+
+  function renderLineage() {
+    const el = document.getElementById("view-lineage");
+    const wrap = document.createElement("div");
+    wrap.className = "lineage";
+
+    const years = ITEMS.map(it => it.year);
+    const minYear = Math.min(...years);
+    const maxYear = Math.max(...years);
+    const yearWidth = 190;
+    const leftMargin = 210;
+    const width = leftMargin + (maxYear - minYear + 1) * yearWidth + 80;
+    const laneY = { transformer: 440, hybrid: 760, "state-space": 1080 };
+    const height = 1230;
+    const stackStep = 50;
+    const xOf = year => leftMargin + (year - minYear) * yearWidth;
+
+    const canvas = document.createElement("div");
+    canvas.className = "lineage-canvas";
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    svg.style.position = "absolute";
+    svg.style.left = "0";
+    svg.style.top = "0";
+    svg.style.overflow = "visible";
+    canvas.appendChild(svg);
+
+    function curve(x1, y1, x2, y2, color, dashed) {
+      const path = document.createElementNS(svgNS, "path");
+      const midX = (x1 + x2) / 2;
+      path.setAttribute("d", `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+      path.setAttribute("stroke", color);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke-width", "2");
+      if (dashed) path.setAttribute("stroke-dasharray", "4 3");
+      svg.appendChild(path);
+    }
+
+    // root node, fanning out to both lanes
+    const rootX = 12, rootY = (laneY.transformer + laneY["state-space"]) / 2;
+    curve(rootX, rootY, xOf(minYear), laneY.transformer, "var(--line-strong)", false);
+    curve(rootX, rootY, xOf(minYear), laneY["state-space"], "var(--line-strong)", false);
+
+    // lane baselines
+    ["transformer", "state-space"].forEach(lane => {
+      const line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", xOf(minYear));
+      line.setAttribute("y1", laneY[lane]);
+      line.setAttribute("x2", xOf(maxYear) + 40);
+      line.setAttribute("y2", laneY[lane]);
+      line.setAttribute("stroke", "var(--line-strong)");
+      line.setAttribute("stroke-width", "2");
+      svg.appendChild(line);
+    });
+
+    const rootLabel = document.createElement("div");
+    rootLabel.className = "lineage-root";
+    rootLabel.style.left = "4px";
+    rootLabel.style.top = (rootY + 14) + "px";
+    rootLabel.textContent = "sequence modeling";
+    canvas.appendChild(rootLabel);
+
+    const laneLabels = { transformer: "Transformer branch", "state-space": "State-Space branch" };
+    ["transformer", "state-space"].forEach(lane => {
+      const label = document.createElement("div");
+      label.className = "lineage-lane-label";
+      label.style.top = (laneY[lane] - 30) + "px";
+      label.textContent = laneLabels[lane];
+      canvas.appendChild(label);
+    });
+    const hybridLabel = document.createElement("div");
+    hybridLabel.className = "lineage-lane-label";
+    hybridLabel.style.left = leftMargin + "px";
+    hybridLabel.style.top = (laneY.hybrid - 30) + "px";
+    hybridLabel.textContent = "Hybrid (merge commits)";
+    canvas.appendChild(hybridLabel);
+
+    // group items by (lane, year) so same-year entries stack instead of overlapping
+    const groups = {};
+    ITEMS.forEach(it => {
+      const key = laneOf(it) + ":" + it.year;
+      (groups[key] = groups[key] || []).push(it);
+    });
+
+    Object.entries(groups).forEach(([key, group]) => {
+      const [lane, yearStr] = key.split(":");
+      const year = Number(yearStr);
+      const x = xOf(year);
+      group.forEach((it, i) => {
+        const c = lineageChip(it);
+        if (lane === "hybrid") {
+          const chipY = laneY.hybrid + i * stackStep;
+          c.style.left = (x - 40) + "px";
+          c.style.top = chipY + "px";
+          curve(x, laneY.transformer, x, chipY + 12, "var(--c-hybrid)", true);
+          curve(x, laneY["state-space"], x, chipY + 12, "var(--c-hybrid)", true);
+        } else {
+          const dir = lane === "transformer" ? -1 : 1;
+          const chipY = laneY[lane] + dir * (26 + i * stackStep);
+          c.style.left = (x - 40) + "px";
+          c.style.top = chipY + "px";
+          const tick = document.createElementNS(svgNS, "line");
+          tick.setAttribute("x1", x);
+          tick.setAttribute("y1", laneY[lane]);
+          tick.setAttribute("x2", x);
+          tick.setAttribute("y2", chipY + 12);
+          tick.setAttribute("stroke", "var(--line)");
+          tick.setAttribute("stroke-width", "1.5");
+          svg.appendChild(tick);
+        }
+        canvas.appendChild(c);
+      });
+    });
+
+    wrap.appendChild(canvas);
+    el.appendChild(wrap);
+  }
+
   document.querySelectorAll(".tabs button").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-pressed", "false"));
@@ -575,6 +803,7 @@
   });
 
   renderLegend();
+  renderLineage();
   renderPipeline();
   renderTimeline();
 </script>

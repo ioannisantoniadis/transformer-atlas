@@ -1,6 +1,7 @@
 # Multi-Query and Grouped-Query Attention (MQA / GQA)
 
 **Lab:** Google · **Year:** 2019 / 2023 · **Paper:** [MQA (Shazeer)](https://arxiv.org/abs/1911.02150), [GQA (Ainslie et al.)](https://arxiv.org/abs/2305.13245)
+**Family:** Transformer
 
 ## The problem
 

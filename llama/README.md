@@ -1,6 +1,7 @@
 # LLaMA
 
 **Lab:** Meta AI · **Year:** 2023 · **Paper:** [LLaMA](https://arxiv.org/abs/2302.13971), [LLaMA 2](https://arxiv.org/abs/2307.09288), [LLaMA 3](https://arxiv.org/abs/2407.21783)
+**Family:** Transformer
 
 ## The problem
 

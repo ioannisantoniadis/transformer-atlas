@@ -1,6 +1,7 @@
 # GPT (decoder-only Transformer)
 
 **Lab:** OpenAI · **Year:** 2018–2020 · **Paper:** [GPT-2](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf), [GPT-3](https://arxiv.org/abs/2005.14165)
+**Family:** Transformer
 
 ## The problem
 

@@ -1,6 +1,7 @@
 # DeepSeek-V2
 
 **Lab:** DeepSeek AI · **Year:** 2024 · **Paper:** [DeepSeek-V2](https://arxiv.org/abs/2405.04434), [DeepSeek-V3](https://arxiv.org/abs/2412.19437)
+**Family:** Transformer
 
 ## The problem
 

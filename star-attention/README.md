@@ -1,6 +1,7 @@
 # Star Attention
 
 **Lab:** NVIDIA · **Year:** 2024 · **Paper:** [Star Attention: Efficient LLM Inference over Long Sequences](https://arxiv.org/abs/2411.17116)
+**Family:** Transformer
 
 ## The problem
 
