@@ -25,6 +25,14 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Scheduled runs pin github.actor to whoever last configured the
+          # cron trigger; GitHub doesn't refresh that on a username rename,
+          # so it can still show the pre-rename username here even though
+          # it's the same (human) account. allowed_bots is the action's
+          # documented escape hatch for an actor that fails GitHub's user
+          # lookup for any reason -- see anthropics/claude-code-action
+          # docs/security.md.
+          allowed_bots: "johnantonn"
           show_full_output: true
           prompt: |
             REPO: ${{ github.repository }}
@@ -131,6 +139,14 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Scheduled runs pin github.actor to whoever last configured the
+          # cron trigger; GitHub doesn't refresh that on a username rename,
+          # so it can still show the pre-rename username here even though
+          # it's the same (human) account. allowed_bots is the action's
+          # documented escape hatch for an actor that fails GitHub's user
+          # lookup for any reason -- see anthropics/claude-code-action
+          # docs/security.md.
+          allowed_bots: "johnantonn"
           show_full_output: true
           prompt: |
             REPO: ${{ github.repository }}
@@ -286,6 +302,14 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Scheduled runs pin github.actor to whoever last configured the
+          # cron trigger; GitHub doesn't refresh that on a username rename,
+          # so it can still show the pre-rename username here even though
+          # it's the same (human) account. allowed_bots is the action's
+          # documented escape hatch for an actor that fails GitHub's user
+          # lookup for any reason -- see anthropics/claude-code-action
+          # docs/security.md.
+          allowed_bots: "johnantonn"
           show_full_output: true
           prompt: |
             REPO: ${{ github.repository }}
