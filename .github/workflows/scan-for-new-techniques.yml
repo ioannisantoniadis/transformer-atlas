@@ -2,14 +2,10 @@ name: Scan for new architecture techniques
 
 on:
   schedule:
-    - cron: "0 9 * * 1" # 09:00 UTC every Monday -- small, frequent batches
-                         # instead of one big monthly one. This shares Claude
-                         # usage limits with any interactive Claude Code
-                         # session on the same account/subscription, so
-                         # smaller/more-frequent runs mean a rate-limit hit
-                         # (see assess/promote's is_error handling) costs a
-                         # few days of delay on a couple of issues, not a
-                         # whole month's backlog.
+    - cron: "0 9 1 * *" # 09:00 UTC on the 1st of every month -- weekly was
+                         # more Claude usage than wanted right now, sharing
+                         # limits with interactive Claude Code sessions on the
+                         # same account/subscription.
   workflow_dispatch: {} # allow manual runs from the Actions tab
 
 jobs:
@@ -49,7 +45,7 @@ jobs:
             sequence-mixing family (Transformer/attention, State-Space/
             Mamba, and hybrids of the two) -- it is a highly selective
             retrospective, not a changelog. At that density, most
-            individual weeks should surface ZERO candidates. The test for
+            individual months should surface ZERO candidates. The test for
             flagging something is not "was this used in a popular recent
             model" -- it's "would this earn its own dedicated entry in a
             ~30-40-item all-time map of the field, the way RoPE,
@@ -59,8 +55,8 @@ jobs:
 
             Find candidates that are NOT already in MAP.md and were
             published, or first clearly crossed into mainstream/
-            widely-cited adoption, in roughly the last 10 days (this runs
-            weekly). The paper itself must be recent -- do not use "recent
+            widely-cited adoption, in roughly the last 35 days (this runs
+            monthly). The paper itself must be recent -- do not use "recent
             adoption" as a loophole to reach back to a much older paper
             just because the model that adopted it happens to have GA'd
             recently; if the underlying paper is more than ~60 days old,
