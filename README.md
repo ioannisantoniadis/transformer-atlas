@@ -1,5 +1,7 @@
 # transformer-atlas
 
+![transformer-atlas — architecture lineage from Transformer to today's frontier LLMs](docs/social-preview.png)
+
 A structured, hands-on map of the transformer architecture — from the 2017
 original through the attention variants, positional encodings, MoE routing,
 and inference tricks that big AI labs (Google, OpenAI, Meta, Mistral AI,
