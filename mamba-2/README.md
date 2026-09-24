@@ -51,6 +51,9 @@ state-space recurrences are two views of the same underlying computation
 fact this map's whole State-Space branch and its cross-links back to
 [`linear-attention`](../linear-attention/) and
 [`gated-deltanet-and-kda`](../gated-deltanet-and-kda/) are built on.
+Codestral Mamba (Mistral AI) is a concrete shipped example built on
+Mamba-2 blocks specifically, rather than the original Mamba-1 recurrence
+covered in [the previous folder](../mamba/).
 
 ## Tradeoffs
 

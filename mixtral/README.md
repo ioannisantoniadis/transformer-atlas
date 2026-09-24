@@ -43,12 +43,14 @@ clean illustration of the point made in
 sublayer specifically, orthogonal to whatever attention mechanism the rest
 of the block uses.
 
-Mixtral 8x7B has 8 experts of ~7B-parameter-equivalent size each per MoE
-layer, ~47B total parameters, but only activates ~13B parameters' worth of
-compute per token (attention + router, always active, plus 2 of 8
-experts) — Mistral AI's reported comparison was quality competitive with
-significantly larger dense models (Llama 2 70B) at a fraction of the
-inference compute.
+Despite the "8x7B" name, Mixtral is **not** 8 separate 7B models: only the
+FFN sublayer is replicated 8x per layer into 8 routed experts, while
+attention and embeddings stay shared/dense across all of them — which is
+why the total is ~47B parameters, not 8 × 7B = 56B. It only activates
+~13B parameters' worth of compute per token (attention + router, always
+active, plus 2 of 8 experts) — Mistral AI's reported comparison was
+quality competitive with significantly larger dense models (Llama 2 70B)
+at a fraction of the inference compute.
 
 ## How it's actually used
 

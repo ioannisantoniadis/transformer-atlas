@@ -47,7 +47,7 @@ ones — the idea being that generic, always-useful computation lives in the
 shared experts, letting the routed experts specialize more sharply instead
 of each needing to also encode common patterns.
 
-Both changes point the same direction: **spend more design effort making
+Both changes point in the same direction: **spend more design effort making
 inference cheap at large scale**, rather than just making the model
 bigger. This is consistent with DeepSeek-V2/V3's broader reputation — very
 large total parameter counts (DeepSeek-V3: 671B total, ~37B active per

@@ -47,9 +47,11 @@ to catch what the state-space layers alone would compress away.
 
 At a reported 256K-token context, Jamba's attention cache needs roughly
 4GB versus roughly 32GB for an all-attention model of comparable size —
-this repo's implementation below works through that specific memory-vs-
-context-length comparison for an all-attention, all-Mamba, and 1:7-hybrid
-model directly, plus a toy retrieval test showing the hybrid recovers a
+this repo's implementation below works through the same category of
+memory-vs-context-length comparison for an all-attention, all-Mamba, and
+1:7-hybrid model directly (a toy config, so its absolute GB figures won't
+match Jamba's reported numbers, but the roughly-8x hybrid-vs-all-attention
+ratio holds), plus a toy retrieval test showing the hybrid recovers a
 specific planted fact about as reliably as all-attention while paying
 close to all-Mamba's memory cost. This interleaving pattern — a small
 attention minority, a state-space majority, plus independent MoE routing

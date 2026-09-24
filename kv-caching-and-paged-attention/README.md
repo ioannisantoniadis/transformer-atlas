@@ -9,9 +9,11 @@ Autoregressive generation (see [`gpt`](../gpt/)) produces one token at a
 time, feeding each new token back in as input for the next step. Done
 naively, generating token `t+1` means re-running the *entire* forward
 pass over tokens `1..t` — recomputing every attention key/value that was
-already computed on the previous step. That's wasted, repeated work: an
-O(n²) total cost across a generation of length n, purely from redundant
-recomputation, on top of attention's own O(n²) cost per step.
+already computed on the previous step, and redoing the full O(t²)
+self-attention among all `t` tokens again from scratch. Summed over a
+generation of length `n`, that's O(n³) total work — an entire extra
+factor of `n` on top of attention's already-quadratic O(n²) cost for a
+single forward pass, purely from redundant recomputation at every step.
 
 ## The idea: KV caching
 

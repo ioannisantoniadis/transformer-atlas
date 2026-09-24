@@ -58,11 +58,17 @@ query position i
 Each branch answers a different question: "what's right next to me"
 (window), "which distant *regions* actually matter, at moderate
 resolution" (CSA), and "what's the coarse shape of everything else"
-(HCA). None of the three branches costs O(n²): the window is O(n·w), CSA
-is O(n·(n/m)) to score summaries plus O(n·k) to attend, and HCA is
-O(n·(n/M)) — and because `m` and (especially) `M` grow with context length
-in practice, the compressed branches stay cheap even as `n` reaches into
-the millions.
+(HCA). The window branch is genuinely O(n·w) — linear, since `w` is
+fixed. The CSA and HCA *scoring* steps are O(n·(n/m)) and O(n·(n/M))
+respectively — still quadratic in `n`, just with the constant divided by
+the (large, fixed) pooling ratio `m` or `M`, which is why they stay a
+small, fixed fraction of dense attention's cost rather than escaping
+O(n²) altogether the way a strictly local window does. CSA's *attend*
+step, after top-k selection, is genuinely O(n·k) — independent of `n²`
+since `k` is fixed. In short: this scheme drives down the constant on
+the O(n²) term by pooling before scoring, rather than changing the
+asymptotic order — the demo below quantifies exactly how much that
+constant shrinks by, including at the million-token scale.
 
 ## How it's actually used
 

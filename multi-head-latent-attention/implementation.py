@@ -104,7 +104,8 @@ if __name__ == "__main__":
     q_content = mla.w_q(x).view(seq_len, num_heads, d_head)[:, head, :]
     c_kv = mla.w_down(x)
 
-    direct_scores = q_content @ w_up_k_head @ c_kv.T                 # reconstruct k, then dot
-    absorbed_scores = (q_content @ w_up_k_head) @ c_kv.T             # fold W_up_K into q first
+    k_content_head = c_kv @ w_up_k_head.T                             # actually reconstruct per-head k
+    direct_scores = q_content @ k_content_head.T                      # reconstruct k, then dot
+    absorbed_scores = (q_content @ w_up_k_head) @ c_kv.T              # fold W_up_K into q first, never reconstruct k
     print(f"\nabsorption trick matches direct reconstruction: "
           f"{torch.allclose(direct_scores, absorbed_scores, atol=1e-4)}")

@@ -63,7 +63,9 @@ even though ALiBi's extrapolation story is arguably cleaner. It remains
 the simplest baseline to reach for when extrapolation robustness matters
 more than squeezing out the last bit of in-distribution quality, and is
 worth understanding as the "minimalist" point in the positional-encoding
-design space, opposite RoPE's "rotate everything" approach.
+design space, opposite RoPE's "rotate everything" approach. The clean
+closed-form slope sequence above assumes `num_heads` is a power of 2; the
+paper's appendix gives an interpolation extension for other head counts.
 
 ## Tradeoffs
 

@@ -50,10 +50,12 @@ of that is identical to standard multi-head attention.
 ## How it's actually used
 
 GQA is close to universal in current open-weight decoder-only models —
-LLaMA 2/3, Mistral, Mixtral, DeepSeek-V2 (as a fallback path — see
-[MLA](../multi-head-latent-attention/) for DeepSeek's actual choice), Qwen.
-It composes directly with [RoPE](../rotary-position-embedding/) (rotate
-before the head-sharing) and is largely orthogonal to
+LLaMA 2/3, Mistral, Mixtral, Qwen. DeepSeek-V2/V3 are the notable
+exception: they replace GQA outright with
+[MLA](../multi-head-latent-attention/) rather than shipping it alongside
+GQA — see that folder for why. GQA composes directly with
+[RoPE](../rotary-position-embedding/) (rotate before the head-sharing)
+and is largely orthogonal to
 [sliding-window](../sliding-window-attention/) or
 [FlashAttention](../flash-attention/) (those change *which* positions are
 attended to or *how* the computation is scheduled; GQA changes *how many

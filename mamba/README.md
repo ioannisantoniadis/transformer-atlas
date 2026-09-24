@@ -42,7 +42,9 @@ same selective recurrence can skip the scan entirely and run as a matmul.
 ## How it's actually used
 
 Mamba is the backbone of a growing set of production and near-production
-LLMs (Codestral Mamba, Falcon Mamba) as a pure-SSM alternative to
+LLMs (Falcon Mamba is the clearest pure Mamba-1 example — Codestral Mamba
+is built on [Mamba-2](../mamba-2/) blocks instead, see that folder) as a
+pure-SSM alternative to
 attention-only Transformers, and — more commonly in frontier labs' actual
 shipped models — as one ingredient in a hybrid stack rather than the
 whole architecture; see [`jamba-and-hybrid-architectures`](../jamba-and-hybrid-architectures/)
