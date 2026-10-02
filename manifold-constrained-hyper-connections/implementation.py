@@ -1,15 +1,19 @@
 """
 mHC (Manifold-Constrained Hyper-Connections): generalizes the single
 residual stream into H parallel streams mixed between layers by a learned
-matrix M. Plain hyper-connections leave M merely row-stochastic (a softmax
-per stream); mHC projects M onto the Birkhoff polytope of doubly-stochastic
-matrices via Sinkhorn-Knopp iterations. Demonstrates the reason that
-matters: by Birkhoff-von Neumann, every doubly-stochastic matrix is a
-convex combination of permutation matrices (each spectral norm exactly 1),
-so both a single mHC mixing step *and the product of many of them across
-depth* stay non-expansive (spectral norm <= 1) -- an identity-mapping
-guarantee plain row-stochastic mixing does not have and can badly violate
-as depth grows.
+matrix M. Plain hyper-connections (Zhu et al. 2024) leave M unconstrained --
+a learned static matrix plus a small input-dependent term, s * tanh(.) + A --
+so its row and column sums can drift from 1; mHC projects M onto the
+Birkhoff polytope of doubly-stochastic matrices via Sinkhorn-Knopp
+iterations. Demonstrates why that matters, with the mHC paper's own metric:
+the "Amax gain" of the matrix composed across depth (largest absolute row
+sum for the forward pass, largest absolute column sum for the backward
+pass; 1 for an identity-like mapping). Unconstrained mixing compounds small
+per-layer deviations into large gains; doubly-stochastic mixing keeps both
+gains at 1 at any depth (exactly, once Sinkhorn has converged; the paper
+uses 20 iterations, which leaves a small bounded drift), and (by
+Birkhoff-von Neumann) its spectral
+norm at <= 1.
 """
 
 import torch
@@ -27,73 +31,81 @@ def sinkhorn_knopp(positive_matrix, num_iters=20, eps=1e-8):
     return m
 
 
-def row_stochastic_mixing(logits):
-    """Plain hyper-connections: softmax per row. Rows sum to 1; columns are
-    left completely unconstrained."""
-    return torch.softmax(logits, dim=-1)
+def unconstrained_mixing(H, perturbation_scale, generator):
+    """Plain hyper-connections: an identity-initialized learned matrix plus a
+    tanh-bounded perturbation, with no constraint on row or column sums."""
+    noise = torch.randn(H, H, generator=generator, dtype=torch.float64)
+    return torch.eye(H, dtype=torch.float64) + perturbation_scale * torch.tanh(noise)
+
+
+def amax_gains(composed):
+    """The mHC paper's 'Amax Gain Magnitude': worst-case forward (row-sum) and
+    backward (column-sum) amplification of a composed mixing matrix."""
+    forward = composed.sum(dim=-1).abs().max().item()
+    backward = composed.sum(dim=-2).abs().max().item()
+    return forward, backward
 
 
 if __name__ == "__main__":
-    torch.manual_seed(0)
     H = 4  # number of parallel hyper-connection streams
-    depth = 30  # layers to compose mixing matrices across
-    logit_scale = 2.5  # sharper-than-uniform mixing, like a trained model's
+    depth = 60  # layers to compose mixing matrices across
+    perturbation_scale = 0.15  # how far each learned matrix sits from the identity
+    logit_scale = 2.5  # sharper-than-uniform mixing for mHC, like a trained model's
+
+    gen = torch.Generator().manual_seed(0)
 
     # --- Sanity check: Sinkhorn output really is (approximately) doubly stochastic ---
-    probe = sinkhorn_knopp(torch.exp(logit_scale * torch.randn(H, H)))
+    probe = sinkhorn_knopp(torch.exp(logit_scale * torch.randn(H, H, generator=gen)))
     print("Sinkhorn-projected matrix row sums: ", [f"{v:.4f}" for v in probe.sum(dim=-1).tolist()])
     print("Sinkhorn-projected matrix col sums: ", [f"{v:.4f}" for v in probe.sum(dim=-2).tolist()])
+    assert torch.allclose(probe.sum(dim=-1), torch.ones(H), atol=1e-4)
+    assert torch.allclose(probe.sum(dim=-2), torch.ones(H), atol=1e-4)
 
-    # --- Compose L independently-sampled mixing matrices, as depth does to a
-    #     residual stream, and track (a) a stream vector's norm and (b) the
-    #     operator (spectral) norm of the COMPOSED transform after each layer. ---
-    x_plain = torch.randn(H, dtype=torch.float64)
-    x_mhc = x_plain.clone()
-    composed_plain = torch.eye(H, dtype=torch.float64)
-    composed_mhc = torch.eye(H, dtype=torch.float64)
-
-    for layer in range(depth):
-        logits = (logit_scale * torch.randn(H, H)).double()
-        M_plain = row_stochastic_mixing(logits)
-        M_mhc = sinkhorn_knopp(torch.exp(logits))
-
-        x_plain = M_plain @ x_plain
-        x_mhc = M_mhc @ x_mhc
-        composed_plain = M_plain @ composed_plain
-        composed_mhc = M_mhc @ composed_mhc
-
-    plain_op_norm = torch.linalg.matrix_norm(composed_plain, ord=2).item()
-    mhc_op_norm = torch.linalg.matrix_norm(composed_mhc, ord=2).item()
-
-    print(f"\nafter composing {depth} independently-sampled mixing matrices:")
-    print(f"  stream vector norm   -- plain: {x_plain.norm().item():.4g}  |  mHC: {x_mhc.norm().item():.4g}  "
-          f"(started at {torch.randn(H, dtype=torch.float64).norm().item():.4g}-ish scale)")
-    print(f"  composed operator (spectral) norm -- plain: {plain_op_norm:.4g}  |  mHC: {mhc_op_norm:.4g}")
-    print(f"  mHC operator norm <= 1 (Birkhoff-von Neumann bound holds): {mhc_op_norm <= 1.0 + 1e-6}")
-    print(f"  plain hyper-connections give no such guarantee -- its composed norm "
-          f"can drift arbitrarily far from 1 as depth grows")
-
-    # --- Same story, averaged over many random depth-30 stacks, to show this
-    #     isn't a cherry-picked seed. ---
-    torch.manual_seed(1)
+    # --- Compose `depth` mixing matrices, as depth does to a residual stream, and
+    #     measure the composed transform's gains, over many random stacks. ---
     trials = 200
-    plain_norms, mhc_norms = [], []
+    plain_fwd, plain_bwd, mhc_fwd, mhc_bwd, mhc_spec = [], [], [], [], []
     for _ in range(trials):
         cp = torch.eye(H, dtype=torch.float64)
         cm = torch.eye(H, dtype=torch.float64)
-        for layer in range(depth):
-            logits = (logit_scale * torch.randn(H, H)).double()
-            cp = row_stochastic_mixing(logits) @ cp
+        for _layer in range(depth):
+            cp = unconstrained_mixing(H, perturbation_scale, gen) @ cp
+            logits = logit_scale * torch.randn(H, H, generator=gen, dtype=torch.float64)
             cm = sinkhorn_knopp(torch.exp(logits)) @ cm
-        plain_norms.append(torch.linalg.matrix_norm(cp, ord=2).item())
-        mhc_norms.append(torch.linalg.matrix_norm(cm, ord=2).item())
+        f, b = amax_gains(cp)
+        plain_fwd.append(f)
+        plain_bwd.append(b)
+        f, b = amax_gains(cm)
+        mhc_fwd.append(f)
+        mhc_bwd.append(b)
+        mhc_spec.append(torch.linalg.matrix_norm(cm, ord=2).item())
 
-    plain_norms = torch.tensor(plain_norms)
-    mhc_norms = torch.tensor(mhc_norms)
-    tol = 1e-3  # Sinkhorn runs a finite number of iterations, so mHC's bound holds up to this slack
-    print(f"\nover {trials} independent {depth}-layer stacks, composed operator norm:")
-    print(f"  plain hyper-connections -- mean {plain_norms.mean():.4g}, max {plain_norms.max():.4g}, "
-          f"fraction exceeding 1: {(plain_norms > 1.0).float().mean().item():.2%}")
-    print(f"  mHC (Sinkhorn)          -- mean {mhc_norms.mean():.4g}, max {mhc_norms.max():.4g}, "
-          f"fraction exceeding 1+{tol:g}: {(mhc_norms > 1.0 + tol).float().mean().item():.2%} "
-          f"(should be ~0%; any excess is finite-Sinkhorn-iteration slack, not unbounded drift like the plain case)")
+    plain_fwd, plain_bwd = torch.tensor(plain_fwd), torch.tensor(plain_bwd)
+    mhc_fwd, mhc_bwd, mhc_spec = torch.tensor(mhc_fwd), torch.tensor(mhc_bwd), torch.tensor(mhc_spec)
+
+    print(f"\nAmax gain of the mixing matrix composed over {depth} layers ({trials} random stacks; 1 = identity-like):")
+    print(f"  plain hyper-connections -- forward median {plain_fwd.median():.4g} (max {plain_fwd.max():.4g}), "
+          f"backward median {plain_bwd.median():.4g} (max {plain_bwd.max():.4g})")
+    print(f"  mHC (Sinkhorn)          -- forward max {mhc_fwd.max():.6f}, backward max {mhc_bwd.max():.6f}, "
+          f"spectral norm max {mhc_spec.max():.6f}")
+
+    # With the paper's 20 Sinkhorn iterations the projection is approximate, so the
+    # composed gain drifts slightly from 1 (the paper reports a maximum of ~1.6 for its
+    # 27B model, versus ~3000 for plain hyper-connections) -- bounded, not exploding.
+    assert mhc_fwd.max() < 1.6 and mhc_bwd.max() < 1.6, "mHC gains should stay near 1"
+    assert plain_fwd.median() > 1.5, "unconstrained mixing should drift well away from gain 1 at this depth"
+    assert plain_fwd.median() > 2 * mhc_fwd.median(), "mHC should be far closer to identity-like than plain HC"
+
+    # Run Sinkhorn to convergence instead, and the guarantee becomes exact: gains pinned
+    # at 1 and (Birkhoff-von Neumann) spectral norm <= 1, at any depth.
+    cm = torch.eye(H, dtype=torch.float64)
+    for _layer in range(depth):
+        logits = logit_scale * torch.randn(H, H, generator=gen, dtype=torch.float64)
+        cm = sinkhorn_knopp(torch.exp(logits), num_iters=500) @ cm
+    f, b = amax_gains(cm)
+    spec = torch.linalg.matrix_norm(cm, ord=2).item()
+    print(f"  mHC, Sinkhorn run to convergence -- forward {f:.8f}, backward {b:.8f}, spectral norm {spec:.8f}")
+    assert abs(f - 1) < 1e-6 and abs(b - 1) < 1e-6 and spec <= 1 + 1e-6
+
+    print("\nchecks passed: mHC gains stay near 1 with 20 iterations and exactly 1 at convergence "
+          "(spectral norm <= 1); unconstrained mixing drifts.")

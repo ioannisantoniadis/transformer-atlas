@@ -87,3 +87,10 @@ if __name__ == "__main__":
         print(f"  {num_layers} layer(s), local-only mask:   {effect_local:.4f}")
     print("\nexpected: local+global reaches nonzero at 2 layers (via the global hub); "
           "local-only stays 0.0 at both -- window=3 can't bridge a 20-position gap that fast.")
+
+    # --- Checks: with a 3-token window, information cannot cross 20 positions in two
+    #     layers; one global token makes it possible. The mask keeps every local pair. ---
+    assert perturbation_effect(local_mask, 1) == 0.0 and perturbation_effect(local_mask, 2) == 0.0
+    assert perturbation_effect(mask, 2) > 0.0
+    assert local_only_entries < longformer_entries < full_entries
+    print("checks passed: local-only cannot bridge the gap; the global token does")

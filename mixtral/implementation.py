@@ -156,3 +156,9 @@ if __name__ == "__main__":
     print(f"expert params in one MoE layer: {expert_params:,} "
           f"(all {num_experts} experts, stored) vs "
           f"{active_expert_params:,.0f} active per token (top_k={top_k})")
+
+    # --- Checks: output shape; 8 experts stored per MoE layer, of which top_k run per token. ---
+    assert logits.shape == (batch, seq_len, vocab_size)
+    assert len(model.blocks[0].moe.experts) == num_experts
+    assert active_expert_params == expert_params * top_k / num_experts < expert_params
+    print("\nchecks passed: shape; 8 experts stored, 2 active per token")

@@ -90,3 +90,9 @@ if __name__ == "__main__":
     # gives the O(1)-per-token, O(n)-total complexity.
     print(f"\nfixed recurrent state size: {d_k} x {d_v} = {d_k * d_v} scalars, "
           f"independent of seq_len={seq_len}")
+
+    # --- Checks: the parallel (O(n^2)) and recurrent (O(n), fixed-state) forms are the same
+    #     computation; linear attention is not softmax attention. ---
+    assert torch.allclose(out_parallel, out_recurrent, atol=1e-5)
+    assert not torch.allclose(out_parallel, out_softmax, atol=1e-2)
+    print("\nchecks passed: parallel == recurrent; differs from softmax")

@@ -115,3 +115,10 @@ if __name__ == "__main__":
           f"Llama-style (no bias): {llama_attn_params}, "
           f"extra bias params: {qwen_attn_params - llama_attn_params} "
           f"({num_heads * (d_model // num_heads)} for q + 2 x {num_kv_heads * (d_model // num_heads)} for k,v)")
+
+    # --- Checks: the only difference between the two blocks is the QKV bias: one bias per
+    #     query dim and per key/value dim of the (grouped) KV heads. ---
+    d_head = d_model // num_heads
+    assert out_qwen.shape == out_llama_style.shape == x.shape
+    assert qwen_attn_params - llama_attn_params == num_heads * d_head + 2 * num_kv_heads * d_head
+    print("\nchecks passed: shapes; extra parameters are exactly the QKV biases")

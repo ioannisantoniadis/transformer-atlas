@@ -153,3 +153,11 @@ if __name__ == "__main__":
 
     total_params = sum(p.numel() for p in model.parameters())
     print(f"total params (no separate output head thanks to tying): {total_params:,}")
+
+    # --- Checks: final logits are soft-capped (|logit| < cap); the output projection reuses
+    #     the embedding (no separate vocab x d_model parameter); local/global alternate. ---
+    assert logits.abs().max().item() < model.final_logit_cap
+    vocab_shaped = [n for n, p in model.named_parameters() if tuple(p.shape) == (vocab_size, d_model)]
+    assert vocab_shaped == ["token_emb.weight"], vocab_shaped
+    assert all(a != b for a, b in zip(attention_types, attention_types[1:]))
+    print("\nchecks passed: logit soft cap, tied embeddings, alternating local/global layers")

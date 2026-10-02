@@ -177,3 +177,11 @@ if __name__ == "__main__":
           f"({100 * total_pairs_l / dense_pairs_l:.4f}% of dense)")
     print(f"  KV cache entries (CSA + HCA compressed caches): {compressed_kv_l:,} vs dense {dense_kv_l:,} "
           f"({100 * compressed_kv_l / dense_kv_l:.2f}% of dense)")
+
+    # --- Checks: output has the right shape; the three branches score fewer pairs than
+    #     dense causal attention, and the compressed caches are smaller than the dense cache,
+    #     both at toy scale and at 1M tokens. ---
+    assert out.shape == (n, d)
+    assert total_pairs < dense_pairs and total_pairs_l < dense_pairs_l
+    assert csa_num_blocks + hca_num_blocks < n and compressed_kv_l < dense_kv_l
+    print("\nchecks passed: shape; fewer scored pairs and a smaller cache than dense")

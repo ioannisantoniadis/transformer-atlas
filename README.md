@@ -89,7 +89,10 @@ python multi-head-latent-attention/implementation.py
 ```
 
 Everything runs on CPU with toy tensor shapes — the point is to see the
-mechanism, not to train a real model.
+mechanism, not to train a real model. Each file also asserts the property its README claims
+(for example that the cached and naive outputs match, or that a distributed
+merge equals full attention), and CI runs all of them on every push with the
+pinned versions in `requirements.txt`.
 
 ## Contributing / extending
 

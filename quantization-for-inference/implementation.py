@@ -81,3 +81,14 @@ if __name__ == "__main__":
     print(f"AWQ-style 4-bit output:     {output_awq:.4f}  (error: {abs(output_awq - exact_output):.4f})")
     print("\nprotecting the salient (high-activation) channels before quantizing reduces output error,")
     print("at 4-bit, for the same quantization grid size -- the core AWQ trade.")
+
+    # --- Checks: per-channel scales beat one per-tensor scale when a channel is much larger;
+    #     8-bit beats 4-bit; protecting salient channels (AWQ idea) lowers the output error. ---
+    def mse(bits, per_channel):
+        dq, _, _ = quantize_symmetric(weight, bits, per_channel)
+        return (weight - dq).pow(2).mean().item()
+    for bits in (8, 4):
+        assert mse(bits, True) < mse(bits, False)
+    assert mse(8, True) < mse(4, True)
+    assert abs(output_awq - exact_output) < abs(output_naive - exact_output)
+    print("\nchecks passed: per-channel < per-tensor error; 8-bit < 4-bit; AWQ scaling helps")

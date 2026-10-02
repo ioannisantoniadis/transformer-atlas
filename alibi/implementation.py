@@ -71,3 +71,14 @@ if __name__ == "__main__":
         farthest_penalty = bias[0, -1, 0].item()  # head 0, last query vs first key
         print(f"\nseq_len={test_len:4d}: bias(head0, farthest pair) = {farthest_penalty:.2f} "
               f"(same formula, any length -- nothing to run out of)")
+
+    # --- Checks (Press et al. 2021): geometric slopes 2^(-8h/n); bias -m*(i-j) for j <= i;
+    #     causal rows of attention weights sum to 1 with no weight on future keys. ---
+    expected = torch.tensor([2 ** (-8 * (h + 1) / num_heads) for h in range(num_heads)])
+    assert torch.allclose(slopes, expected)
+    b = alibi_bias(seq_len, slopes)
+    i, j = torch.tril_indices(seq_len, seq_len)
+    assert torch.allclose(b[:, i, j], -slopes.view(-1, 1) * (i - j).float())
+    assert torch.allclose(weights.sum(-1), torch.ones(num_heads, seq_len), atol=1e-5)
+    assert torch.all(weights.triu(diagonal=1) == 0)
+    print("\nchecks passed: slopes, linear distance bias, causal normalized weights")

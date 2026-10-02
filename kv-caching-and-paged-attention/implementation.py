@@ -140,9 +140,17 @@ if __name__ == "__main__":
     pager.start_request("req_B", num_prompt_tokens=6, shared_prefix_owner="req_A")
     print(f"pages used after 2 requests sharing a prompt: {pager.memory_used_pages()} "
           f"(vs {len(pager.page_tables['req_A']) + math.ceil(6 / 4)} if B didn't share)")
+    pages_shared = pager.memory_used_pages()
+    assert pages_shared == math.ceil(6 / 4), "the shared 6-token prompt should occupy one request's pages"
 
     for i in range(6, 10):  # both generate new, DIFFERENT tokens -> triggers copy-on-write
         pager.append_token("req_A", i)
         pager.append_token("req_B", i)
     print(f"pages used after divergent generation: {pager.memory_used_pages()} "
           f"(copy-on-write kicked in once generation diverged)")
+
+    # --- Checks: caching changes the work, never the result; a shared prompt is stored once
+    #     until the requests diverge (copy-on-write). ---
+    assert torch.allclose(out_naive, out_cached, atol=1e-5)
+    assert pager.memory_used_pages() > pages_shared  # divergent tokens forced new pages
+    print("\nchecks passed: cached == naive outputs; copy-on-write allocated new pages on divergence")

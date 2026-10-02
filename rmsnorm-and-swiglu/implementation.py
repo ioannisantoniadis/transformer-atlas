@@ -62,3 +62,12 @@ if __name__ == "__main__":
     swiglu_params = sum(p.numel() for p in swiglu.parameters())
     standard_params = sum(p.numel() for p in standard_ffn.parameters())
     print(f"standard 4x ReLU-FFN params: {standard_params}, SwiGLU (8/3x) params: {swiglu_params}")
+
+    # --- Checks: RMSNorm rescales each token to unit RMS (before gamma) with d_model
+    #     parameters (no beta); SwiGLU's 8/3 hidden width keeps parameters comparable to a 4x FFN. ---
+    rms = (normed / rmsnorm.gamma).pow(2).mean(dim=-1).sqrt()
+    assert torch.allclose(rms, torch.ones_like(rms), atol=1e-3)
+    assert rms_params == d_model and ln_params == 2 * d_model
+    assert out.shape == x.shape
+    assert abs(swiglu_params - standard_params) / standard_params < 0.15
+    print("\nchecks passed: unit RMS; no bias in RMSNorm; SwiGLU parameter-matched to a 4x FFN")

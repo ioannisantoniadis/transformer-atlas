@@ -103,3 +103,7 @@ if __name__ == "__main__":
           f"(never the full {seq_len}-token sequence, regardless of num_devices)")
     print(f"communication per full attention pass: {num_devices} block rotations of size {block_size}, "
           f"vs each device needing the full {seq_len}-token K/V without ring rotation")
+
+    # --- Check: blockwise ring attention with online-softmax merging is exact. ---
+    assert torch.allclose(ring_output, naive_output, atol=1e-5)
+    print("\nchecks passed: ring attention == full causal attention")

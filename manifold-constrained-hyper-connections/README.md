@@ -18,14 +18,15 @@ Hyper-connections (the line of work mHC extends) noticed that "one residual
 stream" is an arbitrary choice — nothing stops you from carrying several
 parallel streams and letting each layer read a *learned mixture* of them
 instead of a fixed sum. That's strictly more expressive. But it's also more
-dangerous: the plain version lets each layer's mixing matrix be arbitrary
-(row-normalized via softmax so each output stream is *some* weighted
-combination of inputs), and nothing keeps the *composition* of many such
-matrices, across many layers, anywhere near the identity. In practice this
-is exactly what breaks: at small scale it trains fine, and at 3B/9B/27B
-scale (where DeepSeek validated this) plain hyper-connections become
-unstable — the whole point of the residual stream (near-identity signal
-propagation) quietly erodes as depth grows.
+dangerous: in the original Hyper-Connections paper the stream-mixing matrix
+is *unconstrained* — a learned static matrix plus a small input-dependent
+term (`s ∘ tanh(H W) + A`) — so nothing keeps the *composition* of many
+such matrices, across many layers, anywhere near the identity. The mHC paper
+measures exactly this: in a 27B model, the largest absolute row/column sum
+of the composed mixing matrix (its "Amax Gain Magnitude", ideally 1) peaks
+around 3000, and plain hyper-connections show a loss surge around 12k
+training steps that tracks a gradient-norm blow-up. The whole point of the
+residual stream (near-identity signal propagation) erodes as depth grows.
 
 ## The idea
 
@@ -40,13 +41,12 @@ X_out = M @ X_in         (mixing across the H streams, per position)
 X_out[h] += f_h(X_in)    (each layer's block writes into one or more streams)
 ```
 
-Plain hyper-connections make `M` **row-stochastic**: each output stream is
-a softmax-weighted combination of input streams (rows sum to 1). That's
-enough to keep any *individual* mixing step bounded on average, but a
-product of row-stochastic matrices is not itself guaranteed to stay
-well-behaved — its spectral (operator) norm can exceed 1, so composing `L`
-of them across `L` layers can amplify or collapse the stream norms
-exponentially in depth. This mirrors exactly why the original identity
+Plain hyper-connections leave `M` **unconstrained**: its rows and columns
+can sum to anything, so each mixing step can scale the streams up or down a
+little, and composing `L` of them across `L` layers multiplies those
+factors — the forward signal (row sums) and the backward gradient (column
+sums) can grow or shrink exponentially in depth. This mirrors exactly why
+the original identity
 residual (a literal, unconstrained-scale identity mapping) is so hard to
 improve on: relax the constraint even a little, without an equally strong
 replacement guarantee, and deep networks stop training predictably.
@@ -72,19 +72,22 @@ amplifies or shrinks them). Because the operator norm is a convex function,
 any convex combination of norm-1 matrices also has operator norm ≤ 1. So
 every single mHC mixing step is a *non-expansive* map, and — critically —
 so is the **product of many of them across depth**, since the product of
-doubly stochastic matrices is again doubly stochastic. Plain row-stochastic
-mixing has no such guarantee: it can compound into a badly-conditioned
-transform over enough layers, which is exactly the instability DeepSeek
-reports at scale.
+doubly stochastic matrices is again doubly stochastic: its row sums *and*
+column sums stay exactly 1 at any depth, so the gain the mHC paper measures
+is pinned at 1 in both the forward and the backward pass. In practice the
+projection is approximate — the paper runs 20 Sinkhorn iterations — so the
+composed gain drifts slightly, to a reported maximum of about 1.6, against
+about 3000 for plain hyper-connections: bounded rather than exploding.
 
 ## How it's actually used
 
 mHC is a production component of **DeepSeek-V4** (both V4-Pro and
 V4-Flash), sitting at the residual-stream level underneath the rest of the
 block — it composes with everything else in this repo (attention variant,
-normalization, MoE routing) rather than replacing any of it. DeepSeek
-reports it validated at 3B/9B/27B scales with roughly 6-7% compute/memory
-overhead (extra streams and the Sinkhorn iterations aren't free) in
+normalization, MoE routing) rather than replacing any of it. The mHC paper
+validates it on 3B, 9B and 27B models and reports 6.7% additional training
+time at expansion rate `n = 4` (extra streams and the Sinkhorn iterations
+aren't free), in
 exchange for training stability that plain hyper-connections lose at
 scale. It's paired with the Muon optimizer in DeepSeek's stack, though the
 two are independent choices — mHC doesn't require a specific optimizer.
@@ -95,7 +98,7 @@ More streams (`H`) means more activation memory carried through every
 layer, and the Sinkhorn-Knopp projection is extra sequential compute per
 layer (a handful of row/column normalization passes over an `H x H`
 matrix — small since `H` is a small constant, but not zero, hence the
-~6-7% overhead). It also adds a new hyperparameter surface (`H`, number of
+6.7% time overhead at `n = 4`). It also adds a new hyperparameter surface (`H`, number of
 Sinkhorn iterations) that a single fixed residual stream never had. In
 return you get a strictly more expressive inter-layer connectivity pattern
 than a fixed sum, with a mathematical (not just empirical) guarantee that

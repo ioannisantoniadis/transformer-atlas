@@ -1,0 +1,29 @@
+name: Run implementations
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pinned CPU-only requirements
+        run: pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
+
+      - name: Run every topic's implementation.py (each asserts its key property)
+        run: |
+          status=0
+          for f in */implementation.py; do
+            echo "::group::$f"
+            (cd "$(dirname "$f")" && python implementation.py) || { echo "::error::$f failed"; status=1; }
+            echo "::endgroup::"
+          done
+          exit $status

@@ -56,6 +56,12 @@ What you give up. Nothing in this repo is free — say what it costs
   (small random tensors, sensible shapes) and prints something that shows
   the mechanism working — e.g. output shape, an attention map, a routing
   decision, a before/after comparison.
+- Then **assert** the property the README claims, so the file fails loudly if it
+  stops being true: an exact equivalence (cached == naive, absorbed == direct,
+  ring == full attention), a bound (soft-capped logits, doubly stochastic
+  mixing), or a distributional match (speculative decoding reproduces the
+  target). CI (`.github/workflows/implementations.yml`) runs every
+  `implementation.py` on each push.
 - A short module docstring at the top restating what the file demonstrates
   and its relationship to the baseline (one or two sentences, not a
   restatement of the whole README).

@@ -100,3 +100,7 @@ if __name__ == "__main__":
     print(f"phase-2 merge is exact: {torch.allclose(merged_output, naive_output, atol=1e-5)}")
     print(f"\ncommunication per generation step: {len(partials)} small (numerator, denominator, max) "
           f"triples, vs {seq_len} full key/value vectors for naive distributed full attention")
+
+    # --- Check: merging per-host (numerator, denominator, max) partials is exact softmax attention. ---
+    assert torch.allclose(merged_output, naive_output, atol=1e-5)
+    print("\nchecks passed: distributed merge == full attention")

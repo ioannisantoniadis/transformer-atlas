@@ -80,3 +80,15 @@ if __name__ == "__main__":
     print("NTK-aware and YaRN leave high-freq dims closer to their natural (uncompressed) angle,")
     print("compressing mainly the low-freq dims where extrapolation actually hurts -- "
           "YaRN's gamma shows this ramp explicitly (near 1.0 = extrapolate, near 0.0 = interpolate).")
+
+    # --- Checks: naive extrapolation leaves the trained angle range at every frequency;
+    #     position interpolation stays within it (up to position train_len); YaRN's ramp gamma
+    #     goes monotonically from 1 (extrapolate high-freq dims) to 0 (interpolate low-freq
+    #     dims), so YaRN matches naive on the former and PI on the latter. ---
+    assert bool((naive_angles > train_reference_angles).all())
+    assert bool((pi_angles <= train_len * theta + 1e-9).all())
+    g = gamma.tolist()
+    assert g[0] == 1.0 and g[-1] == 0.0 and all(a >= b for a, b in zip(g, g[1:]))
+    hi, lo = gamma == 1.0, gamma == 0.0
+    assert torch.allclose(yarn_ang[hi], naive_angles[hi]) and torch.allclose(yarn_ang[lo], pi_angles[lo])
+    print("\nchecks passed: naive out of range, PI in range, YaRN ramps from extrapolation to interpolation")

@@ -79,3 +79,9 @@ if __name__ == "__main__":
           f"(1 guaranteed token even on immediate rejection, plus accepted draft tokens)")
     print(f"vs naive autoregressive decoding: 1 token per target-model pass "
           f"-> ~{1 + avg_accepted:.2f}x fewer sequential target-model passes for the same output length")
+
+    # --- Checks (Leviathan et al. 2023): accept/reject sampling reproduces the TARGET
+    #     distribution; each round yields between 0 and K accepted draft tokens. ---
+    assert total_variation < 0.01, total_variation
+    assert 0 <= avg_accepted <= K
+    print("\nchecks passed: output distribution matches the target; accepted length in range")

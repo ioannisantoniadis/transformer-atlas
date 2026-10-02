@@ -151,3 +151,10 @@ if __name__ == "__main__":
     print(f"routed experts: {num_routed_experts} total, {top_k} active/token "
           f"({active_expert_params:.0f} of {total_expert_params} params) "
           f"+ {num_shared_experts} shared expert(s) ({shared_params} params, always active)")
+
+    # --- Checks: the MLA cache is the latent plus the decoupled RoPE key; exactly top_k of
+    #     the routed experts' parameters are active per token. ---
+    assert out.shape == (seq_len, d_model)
+    assert mla_cache < mha_cache
+    assert active_expert_params == total_expert_params * top_k / num_routed_experts
+    print("\nchecks passed: output shape, MLA cache smaller than MHA, top-k expert accounting")

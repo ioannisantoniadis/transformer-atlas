@@ -99,3 +99,16 @@ if __name__ == "__main__":
     _, top_experts = router_probs.topk(top_k, dim=-1)
     used_experts = set(top_experts.unique().tolist())
     print(f"\nexperts actually used this batch: {sorted(used_experts)} out of {list(range(num_experts))}")
+
+    # --- Checks: each token's output is exactly the renormalized gate-weighted sum of its
+    #     top-k experts (the other experts contribute nothing); the shared expert is added
+    #     to every token; the load-balancing loss is finite and positive. ---
+    x_flat = x.view(-1, d_model)
+    probs = F.softmax(moe.router(x_flat), dim=-1)
+    w, idx = probs.topk(top_k, dim=-1)
+    w = w / w.sum(-1, keepdim=True)
+    manual = torch.stack([sum(w[t, s] * moe.experts[int(idx[t, s])](x_flat[t:t + 1])[0] for s in range(top_k))
+                          for t in range(x_flat.shape[0])])
+    assert torch.allclose(out.view(-1, d_model), manual, atol=1e-5)
+    assert torch.isfinite(aux_loss) and aux_loss.item() > 0
+    print("\nchecks passed: output = gate-weighted sum of the top-k experts only; finite aux loss")

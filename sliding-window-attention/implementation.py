@@ -75,3 +75,9 @@ if __name__ == "__main__":
         k_cache, v_cache = cache.append(k[t:t+1], v[t:t+1])
     print(f"\nfinal rolling cache size: {k_cache.shape[0]} (bounded at window_size={window_size}, "
           f"vs {seq_len} for a full causal cache)")
+
+    # --- Checks: row i attends to min(i+1, window) positions; the rolling cache never grows
+    #     past the window. ---
+    assert nonzero_per_row.tolist() == [min(i + 1, window_size) for i in range(seq_len)]
+    assert k_cache.shape[0] == window_size
+    print("\nchecks passed: per-row attention count and bounded cache")

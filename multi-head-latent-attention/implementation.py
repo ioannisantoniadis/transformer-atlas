@@ -109,3 +109,10 @@ if __name__ == "__main__":
     absorbed_scores = (q_content @ w_up_k_head) @ c_kv.T              # fold W_up_K into q first, never reconstruct k
     print(f"\nabsorption trick matches direct reconstruction: "
           f"{torch.allclose(direct_scores, absorbed_scores, atol=1e-4)}")
+
+    # --- Checks: folding W_up_K into the query gives the same scores without reconstructing
+    #     per-head keys; MLA caches less per token than even MQA here. ---
+    assert out.shape == (seq_len, d_model)
+    assert torch.allclose(direct_scores, absorbed_scores, atol=1e-4)
+    assert mla_cache < mqa_cache < gqa2_cache < mha_cache
+    print("\nchecks passed: absorption trick exact; cache MLA < MQA < GQA < MHA")
