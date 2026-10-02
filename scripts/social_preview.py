@@ -20,9 +20,9 @@ C_TRANSFORMER = "#c05f24"   # --c-attention
 C_STATESPACE = "#2e6b8f"    # --c-statespace
 C_HYBRID = "#6b6558"        # --c-hybrid
 
-Y_TRANSFORMER = 1.55
-Y_STATESPACE = 0.55
-Y_HYBRID = 0.15
+Y_TRANSFORMER = 1.6
+Y_STATESPACE = 0.2
+Y_HYBRID = 0.9
 
 # (x, label, y-offset direction for the text: 1 above, -1 below)
 ROOT = (0.0, "sequence\nmodeling", -1)
@@ -37,11 +37,11 @@ TRANSFORMER_COMMITS = [
 STATESPACE_COMMITS = [
     (3.0, "S4\n(2021)", -1),
     (5.5, "Mamba\n(2023)", -1),
-    (7.0, "Mamba-2 / SSD\n(2024)", -1),
+    (7.6, "Mamba-2 / SSD\n(2024)", -1),
     (9.5, "Gated DeltaNet\n/ KDA", -1),
 ]
 
-HYBRID_COMMIT = (8.0, "Jamba\n(2024)", 1)
+HYBRID_COMMIT = (6.6, "Jamba (2024)", 0)
 
 
 def main() -> None:
@@ -50,18 +50,12 @@ def main() -> None:
     fig, ax = plt.subplots(figsize=(12.8, 6.4))
     fig.patch.set_facecolor(PAPER)
     ax.set_facecolor(PAPER)
-    fig.subplots_adjust(left=0.03, right=0.97, top=0.78, bottom=0.14)
+    fig.subplots_adjust(left=0.03, right=0.97, top=0.8, bottom=0.12)
 
     ax.set_xlim(-0.6, 10.6)
-    ax.set_ylim(-0.55, 2.1)
+    ax.set_ylim(-0.45, 2.1)
     ax.set_axis_off()
 
-    # Faint blueprint grid, echoing the background-image grid on
-    # docs/visual-map.html, at a scale that stays subtle behind the graph.
-    for gx in [i * 0.5 for i in range(-1, 22)]:
-        ax.axvline(gx, color=LINE, linewidth=0.5, alpha=0.35, zorder=0)
-    for gy in [i * 0.25 for i in range(-2, 9)]:
-        ax.axhline(gy, color=LINE, linewidth=0.5, alpha=0.35, zorder=0)
 
     # Root -> first transformer commit (single trunk before the branch).
     ax.plot([ROOT[0], TRANSFORMER_COMMITS[0][0]], [Y_TRANSFORMER, Y_TRANSFORMER],
@@ -80,15 +74,21 @@ def main() -> None:
              [Y_TRANSFORMER, Y_STATESPACE],
              color=C_STATESPACE, linewidth=2.0, alpha=0.8, zorder=1)
 
-    # Hybrid branch: off the state-space lane, then a merge arrow in from
-    # the transformer lane at the Jamba commit.
-    ax.plot([STATESPACE_COMMITS[2][0], HYBRID_COMMIT[0]], [Y_STATESPACE, Y_HYBRID],
+    # Hybrid branch: Jamba (March 2024) interleaves Transformer and Mamba
+    # layers, so it branches off Mamba (2023) -- Mamba-2 only appeared in May
+    # 2024 -- with a merge arrow in from the transformer lane.
+    ax.plot([STATESPACE_COMMITS[1][0], HYBRID_COMMIT[0]], [Y_STATESPACE, Y_HYBRID],
              color=C_HYBRID, linewidth=2.0, alpha=0.8, zorder=1)
     ax.plot([TRANSFORMER_COMMITS[2][0], HYBRID_COMMIT[0]], [Y_TRANSFORMER, Y_HYBRID],
              color=C_HYBRID, linewidth=2.0, alpha=0.8, zorder=1)
 
     def draw_commit(x, label, updown, y, color, size=180):
         ax.scatter([x], [y], s=size, color=color, edgecolors=PAPER, linewidths=1.6, zorder=2)
+        if updown == 0:  # label to the right (the hybrid lane sits between the others)
+            ax.annotate(label, (x, y), xytext=(14, 0), textcoords="offset points",
+                        ha="left", va="center", fontsize=8.6, color=INK_SOFT,
+                        fontweight="600")
+            return
         ax.annotate(
             label, (x, y), xytext=(0, 15 * updown), textcoords="offset points",
             ha="center", va="bottom" if updown > 0 else "top",
