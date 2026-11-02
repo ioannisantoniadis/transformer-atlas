@@ -69,6 +69,17 @@ production LLM serving stacks (alongside
 one of the few techniques that reduces *latency* specifically, as opposed
 to throughput or memory.
 
+Production systems refine both halves of the loop while keeping this
+verifier. [DSpark](https://arxiv.org/abs/2607.05147) (DeepSeek / Peking
+University, 2026) drafts with a semi-autoregressive model (a parallel
+block drafter plus a lightweight sequential head) and picks, per request,
+how many drafted tokens are worth verifying from predicted acceptance
+probabilities and the serving engine's throughput profile. It serves
+DeepSeek-V4 in production at 60–85% higher per-user speed than DeepSeek's
+earlier MTP-1 setup at matched throughput. A different route removes the
+second model entirely: [`nemotron-labs-diffusion`](../nemotron-labs-diffusion/)
+trains one model whose diffusion pathway drafts for its own AR pathway.
+
 ## Tradeoffs
 
 Requires maintaining and running a second (draft) model, and the speedup

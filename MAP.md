@@ -46,6 +46,8 @@ gitGraph
     commit id: "DeepSeek-V2, LLaMA, Mixtral"
     checkout state-space
     commit id: "Gated DeltaNet / KDA (2024-25)"
+    checkout transformer
+    commit id: "Nemotron-Labs-Diffusion (2026)"
 ```
 
 ## 1. Foundations: Transformer
@@ -118,6 +120,12 @@ for a shipped model applying it across both.
 | [`deepseek-v2`](deepseek-v2/) | DeepSeek AI | 2024 | [DeepSeek-V2](https://arxiv.org/abs/2405.04434) |
 | [`qwen`](qwen/) | Alibaba | 2023–24 | [Qwen Technical Report](https://arxiv.org/abs/2309.16609) |
 | [`gemma`](gemma/) | Google DeepMind | 2024 | [Gemma](https://arxiv.org/abs/2403.08295), [Gemma 2](https://arxiv.org/abs/2408.00118) |
+| [`nemotron-labs-diffusion`](nemotron-labs-diffusion/) (joint AR + block-diffusion training, self-speculative decoding) | NVIDIA | 2026 | [Nemotron-Labs-Diffusion](https://arxiv.org/abs/2607.05722) |
+
+`nemotron-labs-diffusion` composes a standard decoder with a training
+objective rather than new layers: its self-drafting only works because the
+model was trained for it, so it sits here, not with the post-training
+serving techniques in [section 9](#9-inference-time-serving).
 
 ## 8. Hybrid Architectures
 
