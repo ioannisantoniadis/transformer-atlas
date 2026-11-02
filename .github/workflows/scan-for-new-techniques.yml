@@ -252,13 +252,19 @@ jobs:
             production status, the novelty-gate verdict and reason, and
             the resulting grade with a one-line justification.
 
-            Then sync the issue's grade label to match, in one literal
-            command that removes all four possible grade labels and adds
-            back only the correct one (removing a label the issue
-            doesn't have is a harmless no-op, so there's no need to check
-            which one is currently set first):
+            Then sync the issue's grade label to match, in one command
+            that removes the three OTHER grade labels and adds the
+            correct one (removing a label the issue doesn't have is a
+            harmless no-op, so there's no need to check which one is
+            currently set first). Never pass the correct label to
+            --remove-label as well: GitHub applies the add and the
+            remove in no fixed order, so the label can end up removed.
+            For example, for NOTABLE:
 
-              gh issue edit <n> --remove-label grade:watching --remove-label grade:emerging --remove-label grade:notable --remove-label grade:breakthrough --add-label grade:<correct-one>
+              gh issue edit <n> --remove-label grade:watching --remove-label grade:emerging --remove-label grade:breakthrough --add-label grade:notable
+
+            Then confirm with `gh issue view <n> --json labels` that
+            exactly one grade label is set and it's the correct one.
 
             (create each label the first time it's needed, via
             `gh label create`, before referencing it).
